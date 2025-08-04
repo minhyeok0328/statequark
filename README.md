@@ -12,7 +12,9 @@ Lightweight atomic state management for Python, designed for IoT devices and emb
 - 🔔 **Subscriptions**: Listen to state changes for alerts, logging, or device control
 - 🔀 **Async Support**: Perfect for sensor polling and network communication
 - 🧵 **Thread Safe**: Safe for multi-threaded sensor reading and data processing
-- 🪶 **Lightweight**: Zero dependencies, minimal memory footprint for embedded systems
+- 🛡️ **Error Handling**: Custom error handlers for robust IoT applications
+- 🧹 **Resource Management**: Built-in cleanup for long-running applications
+- 🪶 **Lightweight**: Shared thread pool, minimal memory footprint for embedded systems
 - 🎛️ **IoT Ready**: Designed specifically for Raspberry Pi, Arduino, and similar devices
 
 ## Installation
@@ -133,9 +135,108 @@ soil_moisture.set_sync(20.0)
 print(status.value)  # "🚰 Needs watering"
 ```
 
+### Error Handling
+
+```python
+# Custom error handler for IoT applications
+def iot_error_handler(error, callback, quark_instance):
+    timestamp = datetime.now().isoformat()
+    error_msg = f"[{timestamp}] Sensor error: {error}"
+
+    # Log to file
+    with open("/var/log/sensors.log", "a") as f:
+        f.write(error_msg + "\n")
+
+    # Send alert for critical errors
+    if "critical" in str(error).lower():
+        send_sms_alert(error_msg)
+
+# Create sensor with error handler
+temperature_sensor = quark(22.0, error_handler=iot_error_handler)
+
+# Or set error handler later
+humidity_sensor = quark(60.0)
+humidity_sensor.set_error_handler(iot_error_handler)
+
+def faulty_callback(q):
+    if q.value > 100:
+        raise ValueError("Sensor reading out of range!")
+
+temperature_sensor.subscribe(faulty_callback)
+temperature_sensor.set_sync(150)  # Error logged and handled gracefully
+```
+
+### Resource Management
+
+```python
+# Long-running IoT application
+temperature = quark(20.0)
+humidity = quark(50.0)
+
+# Create derived state
+def comfort_index(get):
+    temp = get(temperature)
+    hum = get(humidity)
+    return (temp * 0.6) + (hum * 0.4)
+
+comfort = quark(comfort_index, deps=[temperature, humidity])
+
+# Add monitoring callbacks
+def log_comfort_change(q):
+    print(f"Comfort index: {q.value}")
+
+comfort.subscribe(log_comfort_change)
+
+# When shutting down or replacing sensors
+def shutdown_system():
+    comfort.cleanup()  # Removes dependencies and callbacks
+    print("System safely shut down")
+
+# Use with signal handlers for graceful shutdown
+import signal
+signal.signal(signal.SIGTERM, lambda s, f: shutdown_system())
+```
+
+### Production Example
+
+```python
+from statequark import quark
+import logging
+
+# Production error handler with logging
+def production_error_handler(error, callback, sensor):
+    logging.error(f"Sensor {callback.__name__} error: {error}")
+    if sensor.value > 35:  # Critical temperature
+        os.system("echo 'Temperature alert!' | mail admin@example.com")
+
+# Initialize sensors
+soil_temp = quark(22.0, error_handler=production_error_handler)
+soil_moisture = quark(65.0, error_handler=production_error_handler)
+
+# Automation logic
+irrigation_needed = quark(
+    lambda get: get(soil_moisture) < 30 or get(soil_temp) > 28,
+    deps=[soil_moisture, soil_temp]
+)
+
+# Hardware control with error handling
+def control_pump(q):
+    gpio.output(PUMP_PIN, gpio.HIGH if q.value else gpio.LOW)
+    logging.info(f"Pump {'ON' if q.value else 'OFF'}")
+
+irrigation_needed.subscribe(control_pump)
+
+# Graceful shutdown
+def shutdown():
+    irrigation_needed.cleanup()
+    gpio.cleanup()
+
+signal.signal(signal.SIGTERM, lambda s, f: shutdown())
+```
+
 ## API Reference
 
-### `quark(initial_or_getter, deps=None)`
+### `quark(initial_or_getter, deps=None, error_handler=None)`
 
 Creates a new Quark instance.
 
@@ -143,6 +244,7 @@ Creates a new Quark instance.
 
 - `initial_or_getter`: Initial value or getter function for derived quarks
 - `deps`: List of dependent quarks (required for derived quarks)
+- `error_handler`: Optional custom error handler function
 
 **Returns:** `Quark[T]` instance
 
@@ -167,6 +269,18 @@ Subscribe to value changes.
 #### `unsubscribe(callback: Callable) -> None`
 
 Unsubscribe from value changes.
+
+#### `cleanup() -> None`
+
+Clean up resources to prevent memory leaks in long-running applications. Removes all dependencies and callbacks.
+
+#### `set_error_handler(handler: Optional[ErrorHandler]) -> None`
+
+Set or update the custom error handler for callback exceptions.
+
+**Parameters:**
+
+- `handler`: Error handler function or `None` to use default handling
 
 ## Testing
 
@@ -197,12 +311,13 @@ pytest --cov=statequark --cov-report=html
 
 StateQuark is perfect for:
 
-- **🌡️ Environmental Monitoring**: Temperature, humidity, air quality sensors
-- **🏠 Home Automation**: Smart home device state management
-- **🌱 Agriculture IoT**: Greenhouse monitoring, irrigation control
-- **🏭 Industrial IoT**: Equipment monitoring, predictive maintenance
-- **🤖 Robotics**: Sensor fusion, state machines, control systems
-- **📊 Data Logging**: Reactive data collection and processing
+- **🌡️ Environmental Monitoring**: Temperature, humidity, air quality sensors with error logging
+- **🏠 Home Automation**: Smart home device state management with graceful failure handling
+- **🌱 Agriculture IoT**: Greenhouse monitoring, irrigation control with production-ready error handling
+- **🏭 Industrial IoT**: Equipment monitoring, predictive maintenance with robust error recovery
+- **🤖 Robotics**: Sensor fusion, state machines, control systems with resource cleanup
+- **📊 Data Logging**: Reactive data collection and processing with memory leak prevention
+- **🚨 Critical Systems**: Mission-critical applications requiring 24/7 uptime on Raspberry Pi
 
 ## License
 

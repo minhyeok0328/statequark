@@ -6,6 +6,7 @@ import threading
 
 T = TypeVar("T")
 QuarkCallback = Callable[["Quark[Any]"], None]
+ErrorHandler = Callable[[Exception, QuarkCallback, "Quark[Any]"], None]
 
 _shared_executor: Optional[ThreadPoolExecutor] = None
 _executor_lock = threading.Lock()
@@ -29,12 +30,14 @@ def _cleanup_executor():
         _shared_executor = None
 
 class Quark(Generic[T]):
-    __slots__ = ("_value", "_callbacks", "_lock", "_getter", "_deps")
+    __slots__ = ("_value", "_callbacks", "_lock", "_getter", "_deps", "_error_handler")
 
-    def __init__(self, initial_or_getter: Any, deps: Optional[List["Quark"]] = None):
+    def __init__(self, initial_or_getter: Any, deps: Optional[List["Quark"]] = None, 
+                 error_handler: Optional[ErrorHandler] = None):
         self._lock = threading.RLock()
         self._callbacks: List[QuarkCallback] = []
         self._deps = deps or []
+        self._error_handler = error_handler
         if callable(initial_or_getter):
             self._getter = initial_or_getter
             self._value = self._compute()
@@ -96,7 +99,14 @@ class Quark(Generic[T]):
         try:
             callback(self)
         except Exception as e:
-            print(f"Callback error: {e}")
+            if self._error_handler:
+                try:
+                    self._error_handler(e, callback, self)
+                except Exception as handler_error:
+                    print(f"Error handler failed: {handler_error}")
+                    print(f"Original callback error: {e}")
+            else:
+                print(f"Callback error: {e}")
 
     def _compute(self) -> T:
         def get(dep_quark: "Quark") -> Any:
@@ -108,8 +118,25 @@ class Quark(Generic[T]):
     def _on_dep_change(self, dep: "Quark") -> None:
         self._notify_sync()
 
+    def cleanup(self) -> None:
+        """Clean up resources to prevent memory leaks in long-running IoT applications."""
+        with self._lock:
+            # Remove this quark from all dependencies
+            for dep in self._deps:
+                dep.unsubscribe(self._on_dep_change)
+            
+            # Clear all references
+            self._deps.clear()
+            self._callbacks.clear()
+    
+    def set_error_handler(self, handler: Optional[ErrorHandler]) -> None:
+        """Set custom error handler for callback exceptions."""
+        with self._lock:
+            self._error_handler = handler
+
     def __repr__(self) -> str:
         return f"Quark(value={self.value!r})"
 
-def quark(initial_or_getter: Any, deps: Optional[List[Quark]] = None) -> Quark:
-    return Quark(initial_or_getter, deps)
+def quark(initial_or_getter: Any, deps: Optional[List[Quark]] = None, 
+          error_handler: Optional[ErrorHandler] = None) -> Quark:
+    return Quark(initial_or_getter, deps, error_handler)
