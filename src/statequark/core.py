@@ -1,4 +1,5 @@
 import asyncio
+import atexit
 from typing import Any, Callable, Generic, TypeVar, List, Optional
 from concurrent.futures import ThreadPoolExecutor
 import threading
@@ -6,11 +7,31 @@ import threading
 T = TypeVar("T")
 QuarkCallback = Callable[["Quark[Any]"], None]
 
+_shared_executor: Optional[ThreadPoolExecutor] = None
+_executor_lock = threading.Lock()
+
+def _get_shared_executor() -> ThreadPoolExecutor:
+    global _shared_executor
+    if _shared_executor is None:
+        with _executor_lock:
+            if _shared_executor is None:
+                _shared_executor = ThreadPoolExecutor(
+                    max_workers=4,
+                    thread_name_prefix="quark-callback"
+                )
+                atexit.register(_cleanup_executor)
+    return _shared_executor
+
+def _cleanup_executor():
+    global _shared_executor
+    if _shared_executor is not None:
+        _shared_executor.shutdown(wait=True)
+        _shared_executor = None
+
 class Quark(Generic[T]):
-    __slots__ = ("_value", "_callbacks", "_executor", "_lock", "_getter", "_deps")
+    __slots__ = ("_value", "_callbacks", "_lock", "_getter", "_deps")
 
     def __init__(self, initial_or_getter: Any, deps: Optional[List["Quark"]] = None):
-        self._executor = ThreadPoolExecutor(max_workers=2)
         self._lock = threading.RLock()
         self._callbacks: List[QuarkCallback] = []
         self._deps = deps or []
@@ -59,8 +80,9 @@ class Quark(Generic[T]):
             callbacks_copy = self._callbacks[:]
         if not callbacks_copy:
             return
+        executor = _get_shared_executor()
         await asyncio.gather(
-            *[asyncio.get_event_loop().run_in_executor(self._executor, self._safe_call, cb)
+            *[asyncio.get_event_loop().run_in_executor(executor, self._safe_call, cb)
               for cb in callbacks_copy]
         )
 
