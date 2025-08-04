@@ -31,197 +31,106 @@ pip install -e ".[test]"
 
 ## Quick Start
 
-### Basic Sensor Reading
+### Basic Usage
 
 ```python
 from statequark import quark
 
-# Temperature sensor state
+# Create a reactive state
 temperature = quark(20.0)
 print(temperature.value)  # 20.0
 
-# Update sensor reading synchronously
-temperature.set_sync(25.5)
+# Update values
+temperature.set_sync(25.5)  # Synchronous
 print(temperature.value)  # 25.5
 
-# Update asynchronously (useful for network sensors)
+# Or update asynchronously
 import asyncio
-async def read_network_sensor():
-    await temperature.set(23.2)
-    print(temperature.value)  # 23.2
-
-asyncio.run(read_network_sensor())
+await temperature.set(23.2)  # Async update
 ```
 
-### Derived Sensor States
+### Derived States
 
 ```python
-from statequark import quark
-
 # Temperature in Celsius
 temp_celsius = quark(25.0)
 
-# Automatically calculate Fahrenheit
-def fahrenheit_getter(get):
-    celsius = get(temp_celsius)
-    return (celsius * 9/5) + 32
+# Auto-calculated Fahrenheit
+def to_fahrenheit(get):
+    return get(temp_celsius) * 9/5 + 32
 
-temp_fahrenheit = quark(fahrenheit_getter, deps=[temp_celsius])
+temp_fahrenheit = quark(to_fahrenheit, deps=[temp_celsius])
 print(temp_fahrenheit.value)  # 77.0
 
-# When Celsius changes, Fahrenheit updates automatically
+# Updates automatically when dependency changes
 temp_celsius.set_sync(30.0)
 print(temp_fahrenheit.value)  # 86.0
 ```
 
-### Multi-Sensor Environment Monitoring
+### Multi-Sensor Example
 
 ```python
-from statequark import quark
-
-# Individual sensor readings
+# Sensor readings
 temperature = quark(22.0)
 humidity = quark(45.0)
-pressure = quark(1013.25)
 
-# Comfort index calculation
-def comfort_index_getter(get):
-    temp = get(temperature)
-    hum = get(humidity)
-    # Simple comfort calculation
+# Derived comfort status
+def comfort_status(get):
+    temp, hum = get(temperature), get(humidity)
     if 20 <= temp <= 25 and 40 <= hum <= 60:
         return "Comfortable"
-    elif temp > 25 or hum > 60:
-        return "Too Hot/Humid"
-    else:
-        return "Too Cold/Dry"
+    return "Uncomfortable"
 
-comfort_index = quark(comfort_index_getter, deps=[temperature, humidity])
-print(comfort_index.value)  # "Comfortable"
+comfort = quark(comfort_status, deps=[temperature, humidity])
+print(comfort.value)  # "Comfortable"
 
 temperature.set_sync(28.0)
-print(comfort_index.value)  # "Too Hot/Humid"
+print(comfort.value)  # "Uncomfortable"
 ```
 
-### Device State Monitoring with Alerts
+### Subscriptions and Alerts
 
 ```python
-from statequark import quark
-
-# Device status
+# Device status monitoring
 device_online = quark(True)
 
-def on_device_status_change(quark_instance):
-    if quark_instance.value:
-        print("🟢 Device came online")
-        # Could trigger GPIO LED, send notification, etc.
-    else:
-        print("🔴 Device went offline - Alert!")
-        # Could trigger alarm, send email, etc.
+def on_status_change(q):
+    status = "🟢 Online" if q.value else "🔴 Offline"
+    print(f"Device: {status}")
 
-# Subscribe to status changes
-device_online.subscribe(on_device_status_change)
+# Subscribe to changes
+device_online.subscribe(on_status_change)
 
-device_online.set_sync(False)  # Prints: "🔴 Device went offline - Alert!"
-device_online.set_sync(True)   # Prints: "🟢 Device came online"
-
-# Unsubscribe when done
-device_online.unsubscribe(on_device_status_change)
+device_online.set_sync(False)  # Prints: "Device: 🔴 Offline"
+device_online.set_sync(True)   # Prints: "Device: 🟢 Online"
 ```
 
-### Complex Example: IoT Greenhouse Monitoring System
+### IoT Example: Smart Plant Monitor
 
 ```python
-from statequark import quark
-from typing import Dict, List
-import time
+# Sensor data
+soil_moisture = quark(65.0)
+temperature = quark(24.0)
 
-# Sensor readings
-soil_moisture = quark(65.0)     # Percentage
-air_temperature = quark(24.0)   # Celsius
-air_humidity = quark(55.0)      # Percentage
-light_level = quark(800)        # Lux
-water_level = quark(75.0)       # Tank percentage
-
-# System alerts list
-alerts = quark([])
-
-# Irrigation system status
-def irrigation_needed_getter(get):
-    """Auto-determine if irrigation is needed"""
+# Derived states
+def needs_water(get):
     moisture = get(soil_moisture)
-    temp = get(air_temperature)
+    temp = get(temperature)
+    return moisture < 30 or (temp > 28 and moisture < 50)
 
-    # Need water if soil is dry or temperature is high
-    return moisture < 40 or (temp > 28 and moisture < 60)
+def plant_status(get):
+    if get(needs_water):
+        return "🚰 Needs watering"
+    return "🌱 Healthy"
 
-irrigation_needed = quark(irrigation_needed_getter, deps=[soil_moisture, air_temperature])
+water_alert = quark(needs_water, deps=[soil_moisture, temperature])
+status = quark(plant_status, deps=[water_alert])
 
-# Overall system health
-def system_health_getter(get):
-    """Calculate overall system health score (0-100)"""
-    moisture = get(soil_moisture)
-    temp = get(air_temperature)
-    humidity = get(air_humidity)
-    light = get(light_level)
-    water = get(water_level)
+print(status.value)  # "🌱 Healthy"
 
-    # Health scoring logic
-    scores = []
-    scores.append(100 if 40 <= moisture <= 80 else max(0, 100 - abs(moisture - 60)))
-    scores.append(100 if 20 <= temp <= 26 else max(0, 100 - abs(temp - 23) * 5))
-    scores.append(100 if 45 <= humidity <= 65 else max(0, 100 - abs(humidity - 55)))
-    scores.append(100 if light >= 600 else light / 6)
-    scores.append(100 if water >= 20 else water * 5)
-
-    return round(sum(scores) / len(scores))
-
-system_health = quark(system_health_getter, deps=[
-    soil_moisture, air_temperature, air_humidity, light_level, water_level
-])
-
-# Alert system
-def check_alerts(quark_instance):
-    """Monitor system and generate alerts"""
-    current_alerts = alerts.value.copy()
-    timestamp = time.strftime("%H:%M:%S")
-
-    # Check irrigation
-    if irrigation_needed.value and water_level.value < 10:
-        current_alerts.append(f"{timestamp}: LOW WATER - Cannot irrigate!")
-    elif irrigation_needed.value:
-        current_alerts.append(f"{timestamp}: Irrigation started")
-
-    # Check system health
-    health = system_health.value
-    if health < 50:
-        current_alerts.append(f"{timestamp}: SYSTEM HEALTH CRITICAL: {health}%")
-    elif health < 70:
-        current_alerts.append(f"{timestamp}: System health low: {health}%")
-
-    # Keep only last 5 alerts
-    if len(current_alerts) > 5:
-        current_alerts = current_alerts[-5:]
-
-    alerts.set_sync(current_alerts)
-
-# Subscribe to key changes
-irrigation_needed.subscribe(check_alerts)
-system_health.subscribe(check_alerts)
-
-# Simulate sensor updates
-print(f"Initial System Health: {system_health.value}%")
-print(f"Irrigation Needed: {irrigation_needed.value}")
-
-# Simulate dry soil
-soil_moisture.set_sync(25.0)
-print(f"After soil dried -> Health: {system_health.value}%, Irrigation: {irrigation_needed.value}")
-print("Alerts:", alerts.value)
-
-# Simulate hot weather
-air_temperature.set_sync(32.0)
-print(f"Hot weather -> Health: {system_health.value}%")
-print("Alerts:", alerts.value)
+# Simulate dry conditions
+soil_moisture.set_sync(20.0)
+print(status.value)  # "🚰 Needs watering"
 ```
 
 ## API Reference
