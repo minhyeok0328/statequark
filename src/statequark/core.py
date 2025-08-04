@@ -1,7 +1,7 @@
 import asyncio
 from typing import Any, Callable, Generic, TypeVar, List, Optional
 from concurrent.futures import ThreadPoolExecutor
-from threading import Lock
+import threading
 
 T = TypeVar("T")
 QuarkCallback = Callable[["Quark[Any]"], None]
@@ -11,7 +11,7 @@ class Quark(Generic[T]):
 
     def __init__(self, initial_or_getter: Any, deps: Optional[List["Quark"]] = None):
         self._executor = ThreadPoolExecutor(max_workers=2)
-        self._lock = Lock()
+        self._lock = threading.RLock()
         self._callbacks: List[QuarkCallback] = []
         self._deps = deps or []
         if callable(initial_or_getter):
