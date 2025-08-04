@@ -79,8 +79,9 @@ class Quark(Generic[T]):
     def _compute(self) -> T:
         def get(dep_quark: "Quark") -> Any:
             return dep_quark.value
-        with self._lock:
-            return self._getter(get)
+        if self._getter is None:
+            raise ValueError("Cannot compute value for non-derived quark")
+        return self._getter(get)
 
     def _on_dep_change(self, dep: "Quark") -> None:
         self._notify_sync()

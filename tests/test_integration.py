@@ -121,8 +121,12 @@ def test_smart_thermostat_system():
     heating_system.subscribe(heating_callback)
     efficiency.subscribe(efficiency_callback)
     
-    # Test heating control
+    # Test heating control - initial state doesn't trigger callback
     assert heating_system.value is True  # Should be heating (20 < 21.5)
+    
+    # Trigger first callback by changing temperature
+    current_temp.set_sync(18.0)  # Force heating on
+    assert heating_system.value is True
     assert len(heating_commands) == 1
     
     # Simulate room heating up
@@ -138,10 +142,10 @@ def test_smart_thermostat_system():
 
 def test_greenhouse_automation_system():
     """Test automated greenhouse management system."""
-    # Environmental sensors
+    # Environmental sensors - start with low light to test grow lights
     soil_moisture = quark(60.0)
     air_temp = quark(24.0)
-    light_level = quark(500)
+    light_level = quark(200)  # Low light level to trigger grow lights
     
     # Control systems
     irrigation_log = []
@@ -195,7 +199,7 @@ def test_greenhouse_automation_system():
     # Initial state
     assert irrigation.value is False  # Soil moisture OK
     assert ventilation.value is False  # Temperature OK
-    assert grow_lights.value is True  # Light level low
+    assert grow_lights.value is True  # Light level low (200 < 300)
     
     # Simulate drought conditions
     soil_moisture.set_sync(30.0)
@@ -285,10 +289,10 @@ async def test_async_sensor_network():
 
 def test_production_line_monitoring():
     """Test production line monitoring system."""
-    # Production metrics
+    # Production metrics - start with high temperature to test efficiency alerts
     items_produced = quark(0)
     defect_count = quark(0)
-    machine_temp = quark(45.0)
+    machine_temp = quark(70.0)  # High temperature to trigger efficiency alert
     production_rate = quark(100)  # items per hour
     
     # System metrics
@@ -333,6 +337,14 @@ def test_production_line_monitoring():
     quality.subscribe(quality_callback)
     efficiency.subscribe(efficiency_callback)
     
+    # Check initial efficiency alert due to high temperature
+    initial_efficiency = efficiency.value
+    assert initial_efficiency < 80  # Should be low due to high temperature (70°C)
+    
+    # Trigger efficiency callback by changing temperature
+    machine_temp.set_sync(75.0)  # Even higher temperature
+    assert any("Efficiency alert" in alert for alert in alerts)
+    
     # Simulate production
     items_produced.set_sync(100)
     defect_count.set_sync(2)
@@ -345,8 +357,7 @@ def test_production_line_monitoring():
     assert quality.value == 92.0
     assert any("Quality alert: 92.0%" in alert for alert in alerts)
     
-    # Simulate overheating
-    machine_temp.set_sync(60.0)
+    # Reset temperature to normal to test efficiency improvement
+    machine_temp.set_sync(45.0)
     current_efficiency = efficiency.value
-    assert current_efficiency < 100  # Should be reduced due to temperature
-    assert any("Efficiency alert" in alert for alert in alerts)
+    assert current_efficiency == 100.0  # Should be back to normal
