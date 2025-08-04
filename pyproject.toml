@@ -1,0 +1,24 @@
+[build-system]
+requires = ["setuptools>=61.0", "wheel"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "statequark"
+version = "0.1.0"
+authors = [{ name = "Kim Minhyeok", email = "alsgur7408@gmail.com" }]
+description = "Quark state management for Python"
+readme = "README.md"
+requires-python = ">=3.8"
+classifiers = [
+    "Programming Language :: Python :: 3",
+    "License :: OSI Approved :: MIT License",
+    "Operating System :: OS Independent",
+]
+dependencies = []
+
+[project.optional-dependencies]
+test = ["pytest"]
+
+[project.urls]
+"Homepage" = "https://github.com/minhyeok0328/statequark"
+"Repository" = "https://github.com/minhyeok0328/statequark"
