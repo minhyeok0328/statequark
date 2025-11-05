@@ -10,7 +10,9 @@ Comprehensive tests are organized in separate files:
 - test_concurrency.py: Thread safety tests
 - test_integration.py: Complex integration scenarios
 """
+
 import pytest
+
 from statequark import quark
 
 
@@ -25,8 +27,10 @@ def test_basic_quark():
 def test_derived_quark():
     """Basic derived quark functionality."""
     base = quark(2)
+
     def double_getter(get):
         return get(base) * 2
+
     double = quark(double_getter, deps=[base])
     assert double.value == 4
     base.set_sync(3)
@@ -45,25 +49,25 @@ def test_subscriptions():
     """Basic subscription functionality."""
     values = []
     counter = quark(0)
-    
+
     def callback(q):
         values.append(q.value)
-    
+
     counter.subscribe(callback)
     counter.set_sync(1)
     counter.set_sync(2)
-    
+
     assert values == [1, 2]
 
 
 def test_import_compatibility():
     """Test that public API is importable."""
-    from statequark import Quark, quark, __version__
-    
+    from statequark import Quark, __version__, quark
+
     # Basic usage should work
     q = quark(42)
     assert isinstance(q, Quark)
     assert q.value == 42
-    
+
     # Version should be defined
     assert isinstance(__version__, str)

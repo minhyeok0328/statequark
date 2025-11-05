@@ -1,9 +1,13 @@
 # StateQuark
 
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
-[![Python 3.8+](https://img.shields.io/badge/python-3.8+-blue.svg)](https://www.python.org/downloads/)
+[![Python 3.10+](https://img.shields.io/badge/python-3.10+-blue.svg)](https://www.python.org/downloads/)
+[![Code style: black](https://img.shields.io/badge/code%20style-black-000000.svg)](https://github.com/psf/black)
+[![Typed with mypy](https://img.shields.io/badge/typed-mypy-blue.svg)](http://mypy-lang.org/)
 
 Lightweight atomic state management for Python, designed for IoT devices and embedded systems like Raspberry Pi. StateQuark provides a simple, reactive state management solution perfect for sensor data monitoring, device control, and real-time system state tracking.
+
+Inspired by [Jotai](https://jotai.org/), StateQuark brings atomic state management to the embedded world with a focus on resource efficiency, thread safety, and ease of use.
 
 ## Features
 
@@ -13,9 +17,12 @@ Lightweight atomic state management for Python, designed for IoT devices and emb
 - 🔀 **Async Support**: Perfect for sensor polling and network communication
 - 🧵 **Thread Safe**: Safe for multi-threaded sensor reading and data processing
 - 🛡️ **Error Handling**: Custom error handlers for robust IoT applications
-- 🧹 **Resource Management**: Built-in cleanup for long-running applications
+- 🧹 **Resource Management**: Built-in cleanup for long-running applications with context managers
 - 🪶 **Lightweight**: Shared thread pool, minimal memory footprint for embedded systems
 - 🎛️ **IoT Ready**: Designed specifically for Raspberry Pi, Arduino, and similar devices
+- 🐛 **Debug Mode**: Comprehensive logging for development and troubleshooting
+- ⚙️ **Configurable**: Flexible configuration system for resource constraints
+- 📝 **Type Safe**: Full type hints with mypy support for Python 3.10+
 
 ## Installation
 
@@ -197,6 +204,57 @@ import signal
 signal.signal(signal.SIGTERM, lambda s, f: shutdown_system())
 ```
 
+### Debug Mode
+
+```python
+from statequark import quark, enable_debug, disable_debug
+
+# Enable debug logging for development
+enable_debug()
+
+# All operations will be logged
+temperature = quark(20.0)
+temperature.set_sync(25.5)
+# Logs: "Created Quark #1 with initial value: 20.0"
+# Logs: "Quark #1 value changed: 20.0 -> 25.5"
+
+# Disable when not needed
+disable_debug()
+```
+
+### Configuration
+
+```python
+from statequark import StateQuarkConfig, set_config
+
+# Configure for resource-constrained devices
+config = StateQuarkConfig(
+    debug=True,              # Enable debug logging
+    max_workers=2,           # Limit thread pool size
+    thread_name_prefix="sensor",
+    auto_cleanup=True        # Auto cleanup on exit
+)
+
+set_config(config)
+```
+
+### Context Manager
+
+```python
+from statequark import quark
+
+# Automatic cleanup with context manager
+with quark(20.0) as temperature:
+    def on_change(q):
+        print(f"Temperature: {q.value}°C")
+
+    temperature.subscribe(on_change)
+    temperature.set_sync(25.0)
+    # Output: "Temperature: 25.0°C"
+
+# Resources automatically cleaned up after context exit
+```
+
 ### Production Example
 
 ```python
@@ -236,7 +294,9 @@ signal.signal(signal.SIGTERM, lambda s, f: shutdown())
 
 ## API Reference
 
-### `quark(initial_or_getter, deps=None, error_handler=None)`
+### Core API
+
+#### `quark(initial_or_getter, deps=None, error_handler=None)`
 
 Creates a new Quark instance.
 
@@ -248,7 +308,16 @@ Creates a new Quark instance.
 
 **Returns:** `Quark[T]` instance
 
-### `Quark` Methods
+**Example:**
+```python
+# Simple quark
+counter = quark(0)
+
+# Derived quark
+doubled = quark(lambda get: get(counter) * 2, deps=[counter])
+```
+
+### Quark Methods
 
 #### `value: T`
 
@@ -272,15 +341,49 @@ Unsubscribe from value changes.
 
 #### `cleanup() -> None`
 
-Clean up resources to prevent memory leaks in long-running applications. Removes all dependencies and callbacks.
+Clean up resources to prevent memory leaks. Removes all dependencies and callbacks.
 
 #### `set_error_handler(handler: Optional[ErrorHandler]) -> None`
 
 Set or update the custom error handler for callback exceptions.
 
-**Parameters:**
+### Configuration API
 
-- `handler`: Error handler function or `None` to use default handling
+#### `StateQuarkConfig`
+
+Configuration dataclass for StateQuark.
+
+**Parameters:**
+- `debug: bool = False` - Enable debug logging
+- `max_workers: int = 4` - Thread pool size (1-32)
+- `thread_name_prefix: str = "quark-callback"` - Thread naming prefix
+- `auto_cleanup: bool = True` - Auto cleanup on exit
+
+#### `enable_debug() -> None`
+
+Enable debug logging for detailed operation tracking.
+
+#### `disable_debug() -> None`
+
+Disable debug logging.
+
+#### `get_config() -> StateQuarkConfig`
+
+Get the current global configuration.
+
+#### `set_config(config: StateQuarkConfig) -> None`
+
+Set a new global configuration.
+
+#### `reset_config() -> None`
+
+Reset configuration to default values.
+
+### Utility Functions
+
+#### `cleanup_executor() -> None`
+
+Manually cleanup the shared thread pool executor. Usually handled automatically
 
 ## Testing
 
