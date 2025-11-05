@@ -62,12 +62,12 @@ def test_iot_device_monitoring_system():
     assert initial_health > 80
 
     # Simulate temperature spike
-    temperature.set_sync(35.0)
+    temperature.set(35.0)
     assert status.value == "warning"
     assert len(alerts) == 1
 
     # Simulate battery drain
-    battery_level.set_sync(15.0)
+    battery_level.set(15.0)
     assert status.value == "critical"
     assert len(alerts) == 2
 
@@ -130,18 +130,18 @@ def test_smart_thermostat_system():
     assert heating_system.value is True  # Should be heating (20 < 21.5)
 
     # Trigger first callback by changing temperature
-    current_temp.set_sync(18.0)  # Force heating on
+    current_temp.set(18.0)  # Force heating on
     assert heating_system.value is True
     assert len(heating_commands) == 1
 
     # Simulate room heating up
-    current_temp.set_sync(22.5)
+    current_temp.set(22.5)
     assert heating_system.value is False  # Should stop heating
     assert len(heating_commands) == 2
 
     # Test occupancy effect
-    occupancy.set_sync(False)
-    current_temp.set_sync(
+    occupancy.set(False)
+    current_temp.set(
         19.5
     )  # Lower than occupied target but within unoccupied range
     assert heating_system.value is False  # Should not heat (19.5 >= 20-0.5)
@@ -209,20 +209,20 @@ def test_greenhouse_automation_system():
     assert grow_lights.value is True  # Light level low (200 < 300)
 
     # Simulate drought conditions
-    soil_moisture.set_sync(30.0)
+    soil_moisture.set(30.0)
     assert irrigation.value is True
     assert "Start irrigation" in irrigation_log
 
     # Simulate hot day
-    air_temp.set_sync(32.0)
+    air_temp.set(32.0)
     assert ventilation.value is True
     assert grow_lights.value is False  # Too hot for lights
     assert "Start ventilation" in ventilation_log
     assert "Turn off grow lights" in lighting_log
 
     # Simulate evening (cooler, darker)
-    air_temp.set_sync(20.0)
-    light_level.set_sync(100)
+    air_temp.set(20.0)
+    light_level.set(100)
     assert ventilation.value is False
     assert grow_lights.value is True
 
@@ -277,8 +277,8 @@ async def test_async_sensor_network():
     assert initial_status["network_health"] == "good"
 
     # Simulate sensor updates
-    await sensors["sensor_1"].set({"temp": 25.0, "status": "online"})
-    await sensors["sensor_2"].set({"temp": 24.0, "status": "offline"})
+    await sensors["sensor_1"].set_async({"temp": 25.0, "status": "online"})
+    await sensors["sensor_2"].set_async({"temp": 24.0, "status": "offline"})
 
     # Wait a bit for async processing
     await asyncio.sleep(0.01)
@@ -288,7 +288,7 @@ async def test_async_sensor_network():
     assert final_status["network_health"] == "good"  # Still >= 2 sensors
 
     # Take another sensor offline
-    await sensors["sensor_3"].set({"temp": 21.8, "status": "offline"})
+    await sensors["sensor_3"].set_async({"temp": 21.8, "status": "offline"})
     await asyncio.sleep(0.01)
 
     degraded_status = network.value
@@ -351,22 +351,22 @@ def test_production_line_monitoring():
     assert initial_efficiency < 80  # Should be low due to high temperature (70°C)
 
     # Trigger efficiency callback by changing temperature
-    machine_temp.set_sync(75.0)  # Even higher temperature
+    machine_temp.set(75.0)  # Even higher temperature
     assert any("Efficiency alert" in alert for alert in alerts)
 
     # Simulate production
-    items_produced.set_sync(100)
-    defect_count.set_sync(2)
+    items_produced.set(100)
+    defect_count.set(2)
 
     assert quality.value == 98.0
     assert "Quality: 98.0%" in quality_reports
 
     # Simulate quality issues
-    defect_count.set_sync(8)  # 8 defects out of 100
+    defect_count.set(8)  # 8 defects out of 100
     assert quality.value == 92.0
     assert any("Quality alert: 92.0%" in alert for alert in alerts)
 
     # Reset temperature to normal to test efficiency improvement
-    machine_temp.set_sync(45.0)
+    machine_temp.set(45.0)
     current_efficiency = efficiency.value
     assert current_efficiency == 100.0  # Should be back to normal

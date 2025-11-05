@@ -18,10 +18,10 @@ def test_create_quark_with_initial_value():
 def test_set_sync():
     """Test synchronous value setting."""
     counter = quark(0)
-    counter.set_sync(1)
+    counter.set(1)
     assert counter.value == 1
 
-    counter.set_sync(42)
+    counter.set(42)
     assert counter.value == 42
 
 
@@ -30,25 +30,25 @@ def test_different_data_types():
     # String
     name = quark("test")
     assert name.value == "test"
-    name.set_sync("updated")
+    name.set("updated")
     assert name.value == "updated"
 
     # List
     items = quark([1, 2, 3])
     assert items.value == [1, 2, 3]
-    items.set_sync([4, 5, 6])
+    items.set([4, 5, 6])
     assert items.value == [4, 5, 6]
 
     # Dict
     config = quark({"key": "value"})
     assert config.value == {"key": "value"}
-    config.set_sync({"new_key": "new_value"})
+    config.set({"new_key": "new_value"})
     assert config.value == {"new_key": "new_value"}
 
     # Boolean
     flag = quark(True)
     assert flag.value is True
-    flag.set_sync(False)
+    flag.set(False)
     assert flag.value is False
 
 
@@ -57,10 +57,10 @@ def test_quark_repr():
     q = quark(42)
     assert repr(q) == "Quark(value=42)"
 
-    q.set_sync("hello")
+    q.set("hello")
     assert repr(q) == "Quark(value='hello')"
 
-    q.set_sync([1, 2, 3])
+    q.set([1, 2, 3])
     assert repr(q) == "Quark(value=[1, 2, 3])"
 
 
@@ -70,5 +70,5 @@ def test_value_property_is_readonly():
     assert counter.value == 10
 
     # Value should update when we set new value
-    counter.set_sync(20)
+    counter.set(20)
     assert counter.value == 20

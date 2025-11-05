@@ -70,7 +70,7 @@ def test_executor_with_quarks():
 
     # Trigger multiple updates
     for i in range(5):
-        counter.set_sync(i + 1)
+        counter.set(i + 1)
 
     # All callbacks should have executed
     assert callback_results == [1, 2, 3, 4, 5]

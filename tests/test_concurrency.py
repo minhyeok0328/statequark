@@ -14,7 +14,7 @@ def test_thread_safety_basic():
 
     def worker():
         for i in range(100):
-            counter.set_sync(counter.value + 1)
+            counter.set(counter.value + 1)
             results.append(counter.value)
 
     threads = []
@@ -45,7 +45,7 @@ def test_concurrent_subscriptions():
 
     def update_worker(start_val):
         for i in range(10):
-            sensor.set_sync(start_val + i)
+            sensor.set(start_val + i)
 
     threads = []
     for i in range(3):
@@ -78,7 +78,7 @@ def test_thread_safety_with_derived_quarks():
 
     def worker():
         for i in range(50):
-            base.set_sync(i)
+            base.set(i)
 
     threads = []
     for _ in range(3):
@@ -115,7 +115,7 @@ def test_concurrent_subscribe_unsubscribe():
 
     def update_worker():
         for i in range(20):
-            sensor.set_sync(i)
+            sensor.set(i)
             time.sleep(0.001)
 
     # Start subscription threads
@@ -146,7 +146,7 @@ def test_thread_pool_executor():
 
     def increment_task():
         current = counter.value
-        counter.set_sync(current + 1)
+        counter.set(current + 1)
         with lock:
             results.append(counter.value)
         return counter.value
@@ -173,7 +173,7 @@ def test_reader_writer_scenario():
             current = shared_data.value.copy()
             current["count"] += 1
             current["data"].append(f"item_{i}")
-            shared_data.set_sync(current)
+            shared_data.set(current)
             time.sleep(0.001)
 
     def reader():
@@ -224,7 +224,7 @@ def test_stress_test_subscriptions():
 
     def updater():
         for i in range(20):
-            sensor.set_sync(i)
+            sensor.set(i)
 
     # Start multiple updater threads
     threads = []
@@ -261,12 +261,12 @@ def test_deadlock_prevention():
 
     def worker1():
         for i in range(10):
-            quark1.set_sync(i)
+            quark1.set(i)
             time.sleep(0.001)
 
     def worker2():
         for i in range(10):
-            quark2.set_sync(i)
+            quark2.set(i)
             time.sleep(0.001)
 
     thread1 = threading.Thread(target=worker1)

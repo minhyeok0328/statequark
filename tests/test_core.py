@@ -20,7 +20,7 @@ def test_basic_quark():
     """Basic quark creation and value setting."""
     count = quark(0)
     assert count.value == 0
-    count.set_sync(1)
+    count.set(1)
     assert count.value == 1
 
 
@@ -33,7 +33,7 @@ def test_derived_quark():
 
     double = quark(double_getter, deps=[base])
     assert double.value == 4
-    base.set_sync(3)
+    base.set(3)
     assert double.value == 6
 
 
@@ -41,7 +41,7 @@ def test_derived_quark():
 async def test_async_set():
     """Basic async functionality."""
     temperature = quark(20.0)
-    await temperature.set(25.5)
+    await temperature.set_async(25.5)
     assert temperature.value == 25.5
 
 
@@ -54,8 +54,8 @@ def test_subscriptions():
         values.append(q.value)
 
     counter.subscribe(callback)
-    counter.set_sync(1)
-    counter.set_sync(2)
+    counter.set(1)
+    counter.set(2)
 
     assert values == [1, 2]
 

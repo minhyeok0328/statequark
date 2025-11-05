@@ -15,7 +15,7 @@ def test_simple_derived_quark():
     double = quark(double_getter, deps=[base])
     assert double.value == 4
 
-    base.set_sync(3)
+    base.set(3)
     assert double.value == 6
 
 
@@ -33,16 +33,16 @@ def test_derived_with_multiple_dependencies():
     assert comfort.value == "comfortable"
 
     # Change temperature
-    temp.set_sync(30.0)
+    temp.set(30.0)
     assert comfort.value == "uncomfortable"
 
     # Reset temperature, change humidity
-    temp.set_sync(22.0)
-    humidity.set_sync(80.0)
+    temp.set(22.0)
+    humidity.set(80.0)
     assert comfort.value == "uncomfortable"
 
     # Both back to normal
-    humidity.set_sync(50.0)
+    humidity.set(50.0)
     assert comfort.value == "comfortable"
 
 
@@ -62,7 +62,7 @@ def test_nested_derived_quarks():
     assert doubled.value == 4
     assert quadrupled.value == 8
 
-    base.set_sync(3)
+    base.set(3)
     assert doubled.value == 6
     assert quadrupled.value == 12
 
@@ -90,7 +90,7 @@ def test_complex_derived_calculation():
     assert variance.value == pytest.approx(2.67, rel=1e-2)
 
     # Change one temperature
-    bedroom.set_sync(18.0)
+    bedroom.set(18.0)
     expected_avg = (22.0 + 18.0 + 24.0) / 3
     assert avg_temp.value == pytest.approx(expected_avg, rel=1e-2)
 
@@ -105,7 +105,7 @@ def test_derived_quark_cannot_be_set():
     derived = quark(derived_getter, deps=[base])
 
     with pytest.raises(ValueError, match="Cannot set derived quark directly"):
-        derived.set_sync(10)
+        derived.set(10)
 
 
 def test_derived_quark_with_conditional_logic():
@@ -128,15 +128,15 @@ def test_derived_quark_with_conditional_logic():
     assert status.value == "NORMAL"
 
     # Trigger warning
-    sensor_value.set_sync(65.0)  # 65 > 75 * 0.8 (60)
+    sensor_value.set(65.0)  # 65 > 75 * 0.8 (60)
     assert status.value == "WARNING"
 
     # Trigger alarm
-    sensor_value.set_sync(80.0)
+    sensor_value.set(80.0)
     assert status.value == "ALARM"
 
     # Change threshold
-    threshold.set_sync(90.0)
+    threshold.set(90.0)
     assert status.value == "WARNING"  # 80 > 90 * 0.8 (72)
 
 
@@ -159,10 +159,10 @@ def test_derived_quark_with_string_operations():
     assert name.value == "John Doe"
     assert init.value == "J.D."
 
-    first_name.set_sync("Jane")
+    first_name.set("Jane")
     assert name.value == "Jane Doe"
     assert init.value == "J.D."
 
-    last_name.set_sync("Smith")
+    last_name.set("Smith")
     assert name.value == "Jane Smith"
     assert init.value == "J.S."

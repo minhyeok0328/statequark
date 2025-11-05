@@ -25,6 +25,13 @@ from .config import (
 from .core import Quark, quark
 from .executor import cleanup_executor
 from .types import ErrorHandler, GetterFunction, QuarkCallback
+from .utils import (
+    FileStorage,
+    StorageType,
+    quark_with_default,
+    quark_with_reset,
+    quark_with_storage,
+)
 
 __version__ = "0.2.0"
 __all__ = [
@@ -44,4 +51,10 @@ __all__ = [
     "QuarkCallback",
     "ErrorHandler",
     "GetterFunction",
+    # Storage utilities
+    "StorageType",
+    "FileStorage",
+    "quark_with_storage",
+    "quark_with_reset",
+    "quark_with_default",
 ]

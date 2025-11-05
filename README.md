@@ -49,13 +49,13 @@ from statequark import quark
 temperature = quark(20.0)
 print(temperature.value)  # 20.0
 
-# Update values
-temperature.set_sync(25.5)  # Synchronous
+# Update values (synchronous by default)
+temperature.set(25.5)
 print(temperature.value)  # 25.5
 
-# Or update asynchronously
+# Or update asynchronously when needed
 import asyncio
-await temperature.set(23.2)  # Async update
+await temperature.set_async(23.2)  # Async update
 ```
 
 ### Derived States
@@ -72,7 +72,7 @@ temp_fahrenheit = quark(to_fahrenheit, deps=[temp_celsius])
 print(temp_fahrenheit.value)  # 77.0
 
 # Updates automatically when dependency changes
-temp_celsius.set_sync(30.0)
+temp_celsius.set(30.0)
 print(temp_fahrenheit.value)  # 86.0
 ```
 
@@ -93,7 +93,7 @@ def comfort_status(get):
 comfort = quark(comfort_status, deps=[temperature, humidity])
 print(comfort.value)  # "Comfortable"
 
-temperature.set_sync(28.0)
+temperature.set(28.0)
 print(comfort.value)  # "Uncomfortable"
 ```
 
@@ -110,8 +110,8 @@ def on_status_change(q):
 # Subscribe to changes
 device_online.subscribe(on_status_change)
 
-device_online.set_sync(False)  # Prints: "Device: 🔴 Offline"
-device_online.set_sync(True)   # Prints: "Device: 🟢 Online"
+device_online.set(False)  # Prints: "Device: 🔴 Offline"
+device_online.set(True)   # Prints: "Device: 🟢 Online"
 ```
 
 ### IoT Example: Smart Plant Monitor
@@ -138,7 +138,7 @@ status = quark(plant_status, deps=[water_alert])
 print(status.value)  # "🌱 Healthy"
 
 # Simulate dry conditions
-soil_moisture.set_sync(20.0)
+soil_moisture.set(20.0)
 print(status.value)  # "🚰 Needs watering"
 ```
 
@@ -170,7 +170,7 @@ def faulty_callback(q):
         raise ValueError("Sensor reading out of range!")
 
 temperature_sensor.subscribe(faulty_callback)
-temperature_sensor.set_sync(150)  # Error logged and handled gracefully
+temperature_sensor.set(150)  # Error logged and handled gracefully
 ```
 
 ### Resource Management
@@ -214,7 +214,7 @@ enable_debug()
 
 # All operations will be logged
 temperature = quark(20.0)
-temperature.set_sync(25.5)
+temperature.set(25.5)
 # Logs: "Created Quark #1 with initial value: 20.0"
 # Logs: "Quark #1 value changed: 20.0 -> 25.5"
 
@@ -249,7 +249,7 @@ with quark(20.0) as temperature:
         print(f"Temperature: {q.value}°C")
 
     temperature.subscribe(on_change)
-    temperature.set_sync(25.0)
+    temperature.set(25.0)
     # Output: "Temperature: 25.0°C"
 
 # Resources automatically cleaned up after context exit
@@ -292,6 +292,77 @@ def shutdown():
 signal.signal(signal.SIGTERM, lambda s, f: shutdown())
 ```
 
+### Storage Utilities
+
+StateQuark includes storage utilities for persisting state across device reboots:
+
+```python
+from statequark import quark_with_storage, StorageType
+
+# Session storage (temporary, stored in /tmp/statequark/)
+temp_sensor = quark_with_storage(
+    "temperature",
+    20.0,
+    StorageType.SESSION
+)
+
+# Local storage (persistent, stored in ./.statequark/)
+humidity_sensor = quark_with_storage(
+    "humidity",
+    50.0,
+    StorageType.LOCAL
+)
+
+# Custom storage path
+pressure_sensor = quark_with_storage(
+    "pressure",
+    1013.25,
+    StorageType.LOCAL,
+    base_path="/var/lib/myapp"
+)
+
+# Values automatically persist across program restarts
+temp_sensor.set(25.5)
+```
+
+### Additional Utilities
+
+```python
+from statequark import quark_with_reset, quark_with_default
+
+# Quark with reset capability (factory reset)
+sensor_value, reset_sensor = quark_with_reset(20.0)
+sensor_value.set(25.5)
+reset_sensor.set(None)  # Resets sensor_value to 20.0
+
+# Quark with fallback value for error handling
+sensor = quark(None)
+def get_value(get):
+    val = get(sensor)
+    if val is None:
+        raise ValueError("Sensor disconnected")
+    return val
+
+safe_sensor = quark_with_default(get_value, [sensor], 0.0)
+```
+
+## Examples
+
+Check out the `examples/` directory for complete IoT application examples:
+
+- **basic_sensor.py** - Simple temperature sensor monitoring
+- **persistent_storage.py** - Storage utilities demonstration
+- **smart_thermostat.py** - Complete thermostat with climate control
+- **multi_sensor_dashboard.py** - Real-time multi-sensor monitoring
+- **plant_monitor.py** - Smart plant care system
+
+Run any example:
+```bash
+python examples/basic_sensor.py
+```
+
+See [examples/README.md](examples/README.md) for detailed documentation.
+
 ## API Reference
 
 ### Core API
@@ -323,13 +394,13 @@ doubled = quark(lambda get: get(counter) * 2, deps=[counter])
 
 Get the current value of the quark.
 
-#### `set_sync(new_value: T) -> None`
+#### `set(new_value: T) -> None`
 
-Synchronously set a new value and notify subscribers.
+Synchronously set a new value and notify subscribers. This is the default method for updating values.
 
-#### `async set(new_value: T) -> None`
+#### `async set_async(new_value: T) -> None`
 
-Asynchronously set a new value and notify subscribers.
+Asynchronously set a new value and notify subscribers. Use when async execution is needed.
 
 #### `subscribe(callback: Callable) -> None`
 
@@ -383,7 +454,25 @@ Reset configuration to default values.
 
 #### `cleanup_executor() -> None`
 
-Manually cleanup the shared thread pool executor. Usually handled automatically
+Manually cleanup the shared thread pool executor. Usually handled automatically.
+
+#### `quark_with_storage(key: str, initial_value: T, storage_type: StorageType, base_path: Optional[str] = None) -> Quark[T]`
+
+Create a quark with persistent storage. Values are automatically saved to disk and restored on program restart.
+
+**Parameters:**
+- `key`: Unique storage key
+- `initial_value`: Default value if no stored value exists
+- `storage_type`: `StorageType.SESSION` (temporary) or `StorageType.LOCAL` (persistent)
+- `base_path`: Custom base directory for LOCAL storage (optional)
+
+#### `quark_with_reset(initial_value: T) -> tuple[Quark[T], Quark[None]]`
+
+Create a quark with reset capability. Returns a tuple of (value_quark, reset_quark).
+
+#### `quark_with_default(get_default: callable, deps: list[Quark[Any]], fallback: T) -> Quark[T]`
+
+Create a derived quark with a fallback value. If the getter function raises an exception, the fallback value is used
 
 ## Testing
 

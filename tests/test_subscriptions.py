@@ -12,9 +12,9 @@ def test_basic_subscription():
         values.append(q.value)
 
     counter.subscribe(callback)
-    counter.set_sync(1)
-    counter.set_sync(2)
-    counter.set_sync(3)
+    counter.set(1)
+    counter.set(2)
+    counter.set(3)
 
     assert values == [1, 2, 3]
 
@@ -28,10 +28,10 @@ def test_unsubscribe():
         values.append(q.value)
 
     counter.subscribe(callback)
-    counter.set_sync(1)
+    counter.set(1)
 
     counter.unsubscribe(callback)
-    counter.set_sync(2)
+    counter.set(2)
 
     assert values == [1]
 
@@ -50,7 +50,7 @@ def test_multiple_subscribers():
 
     counter.subscribe(callback1)
     counter.subscribe(callback2)
-    counter.set_sync(5)
+    counter.set(5)
 
     assert values1 == [5]
     assert values2 == [10]
@@ -71,8 +71,8 @@ def test_callback_with_derived_quark():
     derived.subscribe(callback)
 
     # Changes to base should trigger derived callbacks
-    base.set_sync(15)
-    base.set_sync(20)
+    base.set(15)
+    base.set(20)
 
     assert values == [30, 40]
 
@@ -95,7 +95,7 @@ def test_callback_error_handling():
     counter.subscribe(bad_callback)
     counter.subscribe(another_good_callback)
 
-    counter.set_sync(5)
+    counter.set(5)
 
     # Good callbacks should still work despite bad callback
     assert values == [5, 10]
@@ -117,9 +117,9 @@ def test_subscription_with_complex_callback():
 
     temperature.subscribe(temperature_monitor)
 
-    temperature.set_sync(25.0)
-    temperature.set_sync(35.0)
-    temperature.set_sync(5.0)
+    temperature.set(25.0)
+    temperature.set(35.0)
+    temperature.set(5.0)
 
     assert alerts == ["NORMAL: 25.0°C", "HIGH: 35.0°C", "LOW: 5.0°C"]
 
@@ -141,7 +141,7 @@ def test_no_callback_on_initial_value():
     assert values == []
 
     # But should trigger on actual changes
-    counter.set_sync(43)
+    counter.set(43)
     assert values == [43]
 
 
@@ -173,7 +173,7 @@ def test_subscribe_same_callback_twice():
     counter.subscribe(callback)
     counter.subscribe(callback)
 
-    counter.set_sync(1)
+    counter.set(1)
 
     # Should only be called once (no duplicates)
     assert values == [1]
@@ -201,7 +201,7 @@ def test_subscription_chain():
     doubled.subscribe(chain_callback)
     quadrupled.subscribe(chain_callback)
 
-    base.set_sync(3)
+    base.set(3)
 
     # Should trigger callbacks for all dependent quarks
     assert 3 in chain_values  # base

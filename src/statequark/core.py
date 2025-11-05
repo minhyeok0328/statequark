@@ -146,7 +146,7 @@ class Quark(Generic[T]):
                 return self._compute()
             return self._value
 
-    def set_sync(self, new_value: T) -> None:
+    def set(self, new_value: T) -> None:
         """
         Synchronously set a new value and notify subscribers.
 
@@ -161,7 +161,7 @@ class Quark(Generic[T]):
 
         Example:
             >>> temp = Quark(20.0)
-            >>> temp.set_sync(25.5)
+            >>> temp.set(25.5)
             >>> temp.value
             25.5
         """
@@ -181,7 +181,7 @@ class Quark(Generic[T]):
 
         self._notify_sync()
 
-    async def set(self, new_value: T) -> None:
+    async def set_async(self, new_value: T) -> None:
         """
         Asynchronously set a new value and notify subscribers.
 
@@ -196,7 +196,7 @@ class Quark(Generic[T]):
 
         Example:
             >>> temp = Quark(20.0)
-            >>> await temp.set(25.5)
+            >>> await temp.set_async(25.5)
             >>> temp.value
             25.5
         """

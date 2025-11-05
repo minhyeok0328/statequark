@@ -103,8 +103,8 @@ def test_context_manager():
 
     with quark(10) as q:
         q.subscribe(callback)
-        q.set_sync(20)
-        q.set_sync(30)
+        q.set(20)
+        q.set(30)
 
     # After context exit, cleanup should have been called
     assert values == [20, 30]

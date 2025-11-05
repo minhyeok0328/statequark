@@ -11,10 +11,10 @@ from statequark import quark
 async def test_async_set():
     """Test async value setting."""
     temperature = quark(20.0)
-    await temperature.set(25.5)
+    await temperature.set_async(25.5)
     assert temperature.value == 25.5
 
-    await temperature.set(30.0)
+    await temperature.set_async(30.0)
     assert temperature.value == 30.0
 
 
@@ -28,8 +28,8 @@ async def test_async_with_subscriptions():
         values.append(q.value)
 
     sensor.subscribe(callback)
-    await sensor.set(20)
-    await sensor.set(30)
+    await sensor.set_async(20)
+    await sensor.set_async(30)
 
     assert values == [20, 30]
 
@@ -45,7 +45,7 @@ async def test_derived_quark_cannot_be_set_async():
     derived = quark(derived_getter, deps=[base])
 
     with pytest.raises(ValueError, match="Cannot set derived quark directly"):
-        await derived.set(10)
+        await derived.set_async(10)
 
 
 @pytest.mark.asyncio
@@ -63,8 +63,8 @@ async def test_async_with_derived_quarks():
     derived = quark(double, deps=[base])
     derived.subscribe(callback)
 
-    await base.set(15)
-    await base.set(20)
+    await base.set_async(15)
+    await base.set_async(20)
 
     assert values == [30, 40]
 
@@ -77,7 +77,7 @@ async def test_concurrent_async_updates():
     async def increment():
         current = counter.value
         await asyncio.sleep(0.01)  # Simulate async work
-        await counter.set(current + 1)
+        await counter.set_async(current + 1)
 
     # Start multiple concurrent increments
     await asyncio.gather(*[increment() for _ in range(10)])
@@ -99,7 +99,7 @@ async def test_async_callback_execution():
     sensor.subscribe(callback)
 
     execution_order.append("before_set")
-    await sensor.set(1)
+    await sensor.set_async(1)
     execution_order.append("after_set")
 
     # Callback should be executed
@@ -124,9 +124,9 @@ async def test_async_with_multiple_dependencies():
     status = quark(comfort_status, deps=[temp, humidity])
     status.subscribe(callback)
 
-    await temp.set(25.0)
-    await humidity.set(60.0)
-    await temp.set(22.0)
+    await temp.set_async(25.0)
+    await humidity.set_async(60.0)
+    await temp.set_async(22.0)
 
     expected = [
         "temp:25.0,humidity:50.0",
@@ -151,8 +151,8 @@ async def test_async_error_in_callback():
     sensor.subscribe(good_callback)
     sensor.subscribe(bad_callback)
 
-    await sensor.set(1)
-    await sensor.set(2)
+    await sensor.set_async(1)
+    await sensor.set_async(2)
 
     # Good callback should still work
     assert good_values == [1, 2]
@@ -170,9 +170,9 @@ async def test_async_sequence():
     pipeline.subscribe(stage_callback)
 
     # Simulate a processing pipeline
-    await pipeline.set(1)  # Input
-    await pipeline.set(2)  # Processing
-    await pipeline.set(3)  # Output
+    await pipeline.set_async(1)  # Input
+    await pipeline.set_async(2)  # Processing
+    await pipeline.set_async(3)  # Output
 
     assert results == ["stage_1", "stage_2", "stage_3"]
 
@@ -196,9 +196,9 @@ async def test_async_with_network_simulation():
     processor.subscribe(callback)
 
     # Simulate network data updates
-    await sensor_data.set({"value": "temp_25", "timestamp": "12:00"})
+    await sensor_data.set_async({"value": "temp_25", "timestamp": "12:00"})
     await asyncio.sleep(0.01)  # Simulate network delay
-    await sensor_data.set({"value": "temp_30", "timestamp": "12:01"})
+    await sensor_data.set_async({"value": "temp_30", "timestamp": "12:01"})
 
     assert "processed_temp_25" in processed_data
     assert "processed_temp_30" in processed_data
