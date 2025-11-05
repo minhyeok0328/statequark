@@ -5,7 +5,7 @@ This module provides centralized configuration management for the StateQuark lib
 optimized for IoT and embedded systems with limited resources.
 """
 
-from dataclasses import dataclass, field
+from dataclasses import dataclass
 from typing import Optional
 
 from .logger import disable_debug as _disable_debug

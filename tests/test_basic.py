@@ -1,7 +1,5 @@
 """Basic quark functionality tests."""
 
-import pytest
-
 from statequark import quark
 
 

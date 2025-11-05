@@ -7,7 +7,6 @@ import pytest
 
 from statequark import quark
 from statequark.executor import (
-    ExecutorManager,
     cleanup_executor,
     get_executor_manager,
     get_shared_executor,
@@ -118,7 +117,6 @@ def test_concurrent_executor_access():
 def test_executor_error_handling():
     """Test error handling in executor tasks."""
     executor = get_shared_executor()
-    errors = []
 
     def failing_task():
         raise ValueError("Test error")

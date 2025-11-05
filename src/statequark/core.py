@@ -103,7 +103,9 @@ class Quark(Generic[T]):
                     "Getter function provided but no dependencies specified. "
                     "Derived quarks must have at least one dependency."
                 )
-            self._getter: Optional[Callable[[Callable[["Quark[Any]"], Any]], T]] = initial_or_getter  # type: ignore
+            self._getter: Optional[
+                Callable[[Callable[["Quark[Any]"], Any]], T]
+            ] = initial_or_getter  # type: ignore
             self._value = self._compute()
 
             log_debug(

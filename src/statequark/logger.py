@@ -33,7 +33,10 @@ def get_logger() -> logging.Logger:
 
         # Create formatter
         formatter = logging.Formatter(
-            "[%(asctime)s] %(levelname)s [%(name)s.%(funcName)s:%(lineno)d] %(message)s",
+            (
+                "[%(asctime)s] %(levelname)s "
+                "[%(name)s.%(funcName)s:%(lineno)d] %(message)s"
+            ),
             datefmt="%Y-%m-%d %H:%M:%S",
         )
         handler.setFormatter(formatter)

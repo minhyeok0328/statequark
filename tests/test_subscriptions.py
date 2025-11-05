@@ -1,7 +1,5 @@
 """Subscription and callback functionality tests."""
 
-import pytest
-
 from statequark import quark
 
 
