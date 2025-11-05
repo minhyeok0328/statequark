@@ -31,18 +31,18 @@ class ExecutorManager:
             with cls._lock:
                 if cls._instance is None:
                     cls._instance = super().__new__(cls)
-                    cls._instance._initialized = False
         return cls._instance
 
     def __init__(self) -> None:
         """Initialize the executor manager."""
-        if self._initialized:
+        # Use hasattr to avoid mypy errors with dynamic attributes
+        if hasattr(self, "_initialized") and self._initialized:
             return
 
         self._executor: Optional[ThreadPoolExecutor] = None
         self._executor_lock = threading.Lock()
         self._shutdown = False
-        self._initialized = True
+        self._initialized: bool = True
 
         # Register cleanup on exit
         config = get_config()
