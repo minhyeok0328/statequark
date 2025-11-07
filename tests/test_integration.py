@@ -141,9 +141,7 @@ def test_smart_thermostat_system():
 
     # Test occupancy effect
     occupancy.set(False)
-    current_temp.set(
-        19.5
-    )  # Lower than occupied target but within unoccupied range
+    current_temp.set(19.5)  # Lower than occupied target but within unoccupied range
     assert heating_system.value is False  # Should not heat (19.5 >= 20-0.5)
 
 

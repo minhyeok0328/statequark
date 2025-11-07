@@ -7,10 +7,9 @@ across device restarts.
 """
 
 import json
-import os
 from enum import Enum
 from pathlib import Path
-from typing import Any, Generic, Optional, Protocol, TypeVar
+from typing import Any, Callable, Optional, Protocol
 
 from .core import Quark, quark
 from .logger import log_debug, log_error, log_warning
@@ -305,7 +304,9 @@ def quark_with_reset(initial_value: T) -> tuple[Quark[T], Quark[None]]:
 
 
 def quark_with_default(
-    get_default: callable, deps: list[Quark[Any]], fallback: T
+    get_default: Callable[[Callable[[Quark[Any]], Any]], T],
+    deps: list[Quark[Any]],
+    fallback: T,
 ) -> Quark[T]:
     """
     Create a derived quark with a fallback value.
@@ -332,7 +333,7 @@ def quark_with_default(
         >>> safe_sensor.value  # 0.0 (fallback when sensor is None)
     """
 
-    def safe_getter(get: callable) -> T:
+    def safe_getter(get: Callable[[Quark[Any]], Any]) -> T:
         """Getter with exception handling."""
         try:
             return get_default(get)
