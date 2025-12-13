@@ -1,7 +1,7 @@
 """Core Quark atom implementation for atomic state management."""
 
 import threading
-from typing import TYPE_CHECKING, Any, Callable, Generic, Optional, Union
+from typing import TYPE_CHECKING, Any, Callable, Generic, Optional, Union, cast
 
 from .batch import add_to_batch, is_batch_active
 from .derived import DerivedMixin
@@ -86,7 +86,7 @@ class Quark(SubscriptionMixin, DerivedMixin, Generic[T]):
         """Current value. Recomputes for derived quarks."""
         if self._getter:
             with self._lock:
-                return self._compute()  # type: ignore[return-value]
+                return cast(T, self._compute())
         return self._value
 
     def set_sync(self, new_value: T) -> None:
