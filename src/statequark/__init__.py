@@ -12,13 +12,25 @@ from .config import (
 )
 from .executor import cleanup_executor
 from .types import ErrorHandler, GetterFunction, QuarkCallback
-from .utils import quark
+from .factory import quark
+from .utils import (
+    debounce,
+    loadable,
+    Loadable,
+    quark_family,
+    quark_with_reducer,
+    quark_with_storage,
+    select,
+    throttle,
+)
 
-__version__ = "0.3.0"
+__version__ = "0.4.0"
 __all__ = [
+    # Core
     "Quark",
     "quark",
     "batch",
+    # Config
     "StateQuarkConfig",
     "get_config",
     "set_config",
@@ -26,7 +38,17 @@ __all__ = [
     "enable_debug",
     "disable_debug",
     "cleanup_executor",
+    # Types
     "QuarkCallback",
     "ErrorHandler",
     "GetterFunction",
+    # Utils
+    "quark_with_storage",
+    "quark_with_reducer",
+    "select",
+    "loadable",
+    "Loadable",
+    "quark_family",
+    "debounce",
+    "throttle",
 ]
