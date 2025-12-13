@@ -11,15 +11,16 @@ from .config import (
     set_config,
 )
 from .executor import cleanup_executor
-from .types import ErrorHandler, GetterFunction, QuarkCallback
 from .factory import quark
+from .types import ErrorHandler, GetterFunction, QuarkCallback
 from .utils import (
+    Loadable,
+    ValidationError,
     clamp,
     debounce,
     history,
     in_range,
     loadable,
-    Loadable,
     logger,
     middleware,
     persist,
@@ -29,7 +30,6 @@ from .utils import (
     select,
     throttle,
     validate,
-    ValidationError,
 )
 
 __version__ = "0.5.0"
