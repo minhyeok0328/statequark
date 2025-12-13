@@ -17,7 +17,9 @@ def test_basic_subscription():
 def test_unsubscribe():
     values = []
     counter = quark(0)
-    cb = lambda q: values.append(q.value)
+
+    def cb(q):
+        values.append(q.value)
 
     counter.subscribe(cb)
     counter.set_sync(1)
@@ -78,7 +80,9 @@ def test_no_callback_on_initial():
 def test_no_duplicate_subscription():
     values = []
     counter = quark(0)
-    cb = lambda q: values.append(q.value)
+
+    def cb(q):
+        values.append(q.value)
 
     counter.subscribe(cb)
     counter.subscribe(cb)
