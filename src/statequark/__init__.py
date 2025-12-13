@@ -1,5 +1,7 @@
 """StateQuark - Atomic state management for IoT and embedded systems."""
 
+from .atom import Quark
+from .batch import batch
 from .config import (
     StateQuarkConfig,
     disable_debug,
@@ -8,9 +10,9 @@ from .config import (
     reset_config,
     set_config,
 )
-from .core import Quark, batch, quark
 from .executor import cleanup_executor
 from .types import ErrorHandler, GetterFunction, QuarkCallback
+from .utils import quark
 
 __version__ = "0.3.0"
 __all__ = [
