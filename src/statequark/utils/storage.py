@@ -1,9 +1,8 @@
 """Persistent storage for Quark state."""
 
 import json
-import os
 from pathlib import Path
-from typing import Any, Callable, Generic, Optional, Protocol, Union, cast
+from typing import Any, Generic, Optional, Protocol, Union, cast
 
 from ..atom import Quark
 from ..types import T

@@ -1,13 +1,12 @@
 """Subscription and notification system for StateQuark."""
 
 import asyncio
-from typing import TYPE_CHECKING, Any
+from typing import TYPE_CHECKING
 
 from .executor import get_shared_executor
 from .logger import log_debug, log_error
 
 if TYPE_CHECKING:
-    from .atom import Quark
     from .types import ErrorHandler, QuarkCallback
 
 

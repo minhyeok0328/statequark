@@ -2,19 +2,16 @@
 
 import tempfile
 import time
-from pathlib import Path
 
 import pytest
 
 from statequark import (
-    Quark,
     ValidationError,
     clamp,
     debounce,
     history,
     in_range,
     loadable,
-    logger,
     middleware,
     persist,
     quark,
@@ -149,33 +146,33 @@ class TestSelect:
 class TestLoadable:
     def test_initial_has_data(self):
         source = quark(42)
-        l = loadable(source)
+        loaded = loadable(source)
 
-        assert l.value.state == "hasData"
-        assert l.value.data == 42
+        assert loaded.value.state == "hasData"
+        assert loaded.value.data == 42
 
     def test_set_loading(self):
         source = quark(0)
-        l = loadable(source)
+        loaded = loadable(source)
 
-        l.set_loading()
-        assert l.value.state == "loading"
+        loaded.set_loading()
+        assert loaded.value.state == "loading"
 
     def test_set_error(self):
         source = quark(0)
-        l = loadable(source)
+        loaded = loadable(source)
 
-        l.set_error(ValueError("test error"))
-        assert l.value.state == "hasError"
-        assert isinstance(l.value.error, ValueError)
+        loaded.set_error(ValueError("test error"))
+        assert loaded.value.state == "hasError"
+        assert isinstance(loaded.value.error, ValueError)
 
     def test_source_change_updates_loadable(self):
         source = quark(1)
-        l = loadable(source)
+        loaded = loadable(source)
 
         source.set_sync(2)
-        assert l.value.state == "hasData"
-        assert l.value.data == 2
+        assert loaded.value.state == "hasData"
+        assert loaded.value.data == 2
 
 
 class TestQuarkFamily:
