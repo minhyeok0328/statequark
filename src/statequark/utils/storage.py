@@ -32,7 +32,7 @@ class FileStorage(Generic[T]):
             return default
         try:
             with open(path, "r") as f:
-                return json.load(f)
+                return json.load(f)  # type: ignore[return-value]
         except (json.JSONDecodeError, OSError):
             return default
 
@@ -51,7 +51,7 @@ class MemoryStorage(Generic[T]):
         self._data: dict[str, Any] = {}
 
     def get(self, key: str, default: T) -> T:
-        return self._data.get(key, default)
+        return self._data.get(key, default)  # type: ignore[return-value]
 
     def set(self, key: str, value: T) -> None:
         self._data[key] = value

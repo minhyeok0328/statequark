@@ -40,7 +40,7 @@ class DerivedMixin:
     def _setup_dependencies(self) -> None:
         """Subscribe to all dependencies."""
         for dep in self._deps:
-            dep.subscribe(self._on_dep_change)  # type: ignore[arg-type]
+            dep.subscribe(self._on_dep_change)
 
     def _cleanup_dependencies(self) -> None:
         """Unsubscribe from all dependencies."""
@@ -48,6 +48,6 @@ class DerivedMixin:
 
         for dep in self._deps:
             try:
-                dep.unsubscribe(self._on_dep_change)  # type: ignore[arg-type]
+                dep.unsubscribe(self._on_dep_change)
             except Exception as e:
                 log_warning("Quark #%d: cleanup error: %s", self._id, e)

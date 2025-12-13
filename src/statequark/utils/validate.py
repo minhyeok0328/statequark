@@ -60,6 +60,6 @@ def in_range(min_val: float, max_val: float) -> Callable[[float], bool]:
     return lambda x: min_val <= x <= max_val
 
 
-def clamp(min_val: T, max_val: T) -> Callable[[T], T]:
+def clamp(min_val: float, max_val: float) -> Callable[[float], float]:
     """Create a clamping function for on_invalid."""
     return lambda x: max(min_val, min(max_val, x))

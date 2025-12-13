@@ -86,7 +86,7 @@ class Quark(SubscriptionMixin, DerivedMixin, Generic[T]):
         """Current value. Recomputes for derived quarks."""
         if self._getter:
             with self._lock:
-                return self._compute()
+                return self._compute()  # type: ignore[return-value]
         return self._value
 
     def set_sync(self, new_value: T) -> None:
