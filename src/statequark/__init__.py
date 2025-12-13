@@ -1,18 +1,4 @@
-"""
-StateQuark - Lightweight atomic state management for IoT and embedded systems.
-
-StateQuark provides a simple, reactive state management solution inspired by Jotai,
-optimized for resource-constrained devices like Raspberry Pi and other embedded systems.
-
-Quick Start:
-    >>> from statequark import quark
-    >>> temperature = quark(20.0)
-    >>> temperature.value
-    20.0
-    >>> temperature.set_sync(25.5)
-
-For detailed documentation, visit: https://github.com/minhyeok0328/statequark
-"""
+"""StateQuark - Atomic state management for IoT and embedded systems."""
 
 from .config import (
     StateQuarkConfig,
@@ -22,25 +8,22 @@ from .config import (
     reset_config,
     set_config,
 )
-from .core import Quark, quark
+from .core import Quark, batch, quark
 from .executor import cleanup_executor
 from .types import ErrorHandler, GetterFunction, QuarkCallback
 
-__version__ = "0.2.0"
+__version__ = "0.3.0"
 __all__ = [
-    # Core classes and functions
     "Quark",
     "quark",
-    # Configuration
+    "batch",
     "StateQuarkConfig",
     "get_config",
     "set_config",
     "reset_config",
     "enable_debug",
     "disable_debug",
-    # Executor management
     "cleanup_executor",
-    # Type definitions
     "QuarkCallback",
     "ErrorHandler",
     "GetterFunction",
