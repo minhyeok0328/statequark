@@ -8,14 +8,22 @@ import pytest
 
 from statequark import (
     Quark,
+    ValidationError,
+    clamp,
     debounce,
+    history,
+    in_range,
     loadable,
+    logger,
+    middleware,
+    persist,
     quark,
     quark_family,
     quark_with_reducer,
     quark_with_storage,
     select,
     throttle,
+    validate,
 )
 from statequark.utils.storage import FileStorage, MemoryStorage
 
@@ -261,3 +269,94 @@ class TestThrottle:
         q.force_set(99)
 
         assert q.value == 99
+
+
+class TestHistory:
+    def test_undo_redo(self):
+        q = history(0)
+        q.set_sync(1)
+        q.set_sync(2)
+        q.set_sync(3)
+
+        assert q.value == 3
+        assert q.undo()
+        assert q.value == 2
+        assert q.undo()
+        assert q.value == 1
+        assert q.redo()
+        assert q.value == 2
+
+    def test_undo_at_start(self):
+        q = history(0)
+        assert not q.undo()
+        assert q.value == 0
+
+    def test_redo_at_end(self):
+        q = history(0)
+        q.set_sync(1)
+        assert not q.redo()
+
+    def test_history_truncation(self):
+        q = history(0)
+        q.set_sync(1)
+        q.set_sync(2)
+        q.undo()
+        q.set_sync(3)
+        assert not q.redo()
+        assert q.value == 3
+
+    def test_max_size(self):
+        q = history(0, max_size=3)
+        for i in range(1, 10):
+            q.set_sync(i)
+        assert q.history_size <= 4
+
+
+class TestValidate:
+    def test_valid_value(self):
+        q = validate(50, in_range(0, 100))
+        q.set_sync(75)
+        assert q.value == 75
+
+    def test_invalid_raises(self):
+        q = validate(50, in_range(0, 100))
+        with pytest.raises(ValidationError):
+            q.set_sync(150)
+
+    def test_clamp_on_invalid(self):
+        q = validate(50, in_range(0, 100), clamp(0, 100))
+        q.set_sync(150)
+        assert q.value == 100
+        q.set_sync(-10)
+        assert q.value == 0
+
+    def test_invalid_initial_raises(self):
+        with pytest.raises(ValidationError):
+            validate(150, in_range(0, 100))
+
+
+class TestMiddleware:
+    def test_basic_middleware(self):
+        log = []
+        q = middleware(0)
+        q.use(lambda old, new, next: (log.append((old, new)), next(new)))
+
+        q.set_sync(1)
+        q.set_sync(2)
+        assert log == [(0, 1), (1, 2)]
+
+    def test_middleware_chain(self):
+        q = middleware(0)
+        q.use(lambda o, n, next: next(n * 2))
+        q.use(lambda o, n, next: next(n + 1))
+
+        q.set_sync(5)
+        assert q.value == 11  # (5 * 2) + 1
+
+    def test_persist_middleware(self):
+        storage = {}
+        q = middleware(0)
+        q.use(persist(storage, "count"))
+
+        q.set_sync(42)
+        assert storage["count"] == 42

@@ -14,17 +14,25 @@ from .executor import cleanup_executor
 from .types import ErrorHandler, GetterFunction, QuarkCallback
 from .factory import quark
 from .utils import (
+    clamp,
     debounce,
+    history,
+    in_range,
     loadable,
     Loadable,
+    logger,
+    middleware,
+    persist,
     quark_family,
     quark_with_reducer,
     quark_with_storage,
     select,
     throttle,
+    validate,
+    ValidationError,
 )
 
-__version__ = "0.4.0"
+__version__ = "0.5.0"
 __all__ = [
     # Core
     "Quark",
@@ -51,4 +59,12 @@ __all__ = [
     "quark_family",
     "debounce",
     "throttle",
+    "history",
+    "validate",
+    "ValidationError",
+    "in_range",
+    "clamp",
+    "middleware",
+    "logger",
+    "persist",
 ]
