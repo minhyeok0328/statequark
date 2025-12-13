@@ -28,7 +28,9 @@ def test_concurrent_subscriptions():
     results = []
     lock = threading.Lock()
 
-    sensor.subscribe(lambda q: (lock.acquire(), results.append(q.value), lock.release()))
+    sensor.subscribe(
+        lambda q: (lock.acquire(), results.append(q.value), lock.release())
+    )
 
     def worker(start):
         for i in range(10):
@@ -49,7 +51,9 @@ def test_derived_thread_safety():
     lock = threading.Lock()
 
     derived = quark(lambda get: get(base) * 2, deps=[base])
-    derived.subscribe(lambda q: (lock.acquire(), results.append(q.value), lock.release()))
+    derived.subscribe(
+        lambda q: (lock.acquire(), results.append(q.value), lock.release())
+    )
 
     def worker():
         for i in range(50):

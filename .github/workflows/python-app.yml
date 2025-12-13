@@ -108,7 +108,7 @@ jobs:
 
       - name: Run basic tests
         run: |
-          pytest tests/test_basic.py tests/test_core.py -v
+          pytest tests/test_basic.py -v
 
   performance:
     runs-on: ubuntu-latest

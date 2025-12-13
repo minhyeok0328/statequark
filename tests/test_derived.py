@@ -19,7 +19,9 @@ def test_multiple_dependencies():
     humidity = quark(60.0)
 
     comfort = quark(
-        lambda get: "ok" if 20 <= get(temp) <= 26 and 40 <= get(humidity) <= 70 else "bad",
+        lambda get: (
+            "ok" if 20 <= get(temp) <= 26 and 40 <= get(humidity) <= 70 else "bad"
+        ),
         deps=[temp, humidity],
     )
 

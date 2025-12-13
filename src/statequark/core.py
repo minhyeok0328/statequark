@@ -69,13 +69,15 @@ class Quark(Generic[T]):
         if callable(initial_or_getter):
             if not self._deps:
                 raise ValueError("Derived quarks require at least one dependency")
-            self._getter: Optional[
-                Callable[[Callable[["Quark[Any]"], Any]], T]
-            ] = initial_or_getter
+            self._getter: Optional[Callable[[Callable[["Quark[Any]"], Any]], T]] = (
+                initial_or_getter
+            )
             self._initial = None
             self._value: T = self._compute()
 
-            log_debug("Created derived Quark #%d with %d deps", self._id, len(self._deps))
+            log_debug(
+                "Created derived Quark #%d with %d deps", self._id, len(self._deps)
+            )
 
             for dep in self._deps:
                 dep.subscribe(self._on_dep_change)
@@ -131,14 +133,20 @@ class Quark(Generic[T]):
         with self._lock:
             if callback not in self._callbacks:
                 self._callbacks.append(callback)
-                log_debug("Quark #%d: +subscriber (%d total)", self._id, len(self._callbacks))
+                log_debug(
+                    "Quark #%d: +subscriber (%d total)", self._id, len(self._callbacks)
+                )
 
     def unsubscribe(self, callback: "QuarkCallback") -> None:
         """Unsubscribe from value changes."""
         with self._lock:
             if callback in self._callbacks:
                 self._callbacks.remove(callback)
-                log_debug("Quark #%d: -subscriber (%d remaining)", self._id, len(self._callbacks))
+                log_debug(
+                    "Quark #%d: -subscriber (%d remaining)",
+                    self._id,
+                    len(self._callbacks),
+                )
 
     def cleanup(self) -> None:
         """Release resources. Essential for long-running IoT applications."""

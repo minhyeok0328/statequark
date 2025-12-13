@@ -21,7 +21,9 @@ def test_iot_monitoring_system():
         return "normal"
 
     system_status = quark(status, deps=[temperature, humidity, battery])
-    system_status.subscribe(lambda q: alerts.append(q.value) if q.value != "normal" else None)
+    system_status.subscribe(
+        lambda q: alerts.append(q.value) if q.value != "normal" else None
+    )
 
     assert system_status.value == "normal"
 
@@ -38,7 +40,9 @@ def test_thermostat_control():
     target = quark(22.0)
     commands = []
 
-    heating = quark(lambda get: get(current) < get(target) - 0.5, deps=[current, target])
+    heating = quark(
+        lambda get: get(current) < get(target) - 0.5, deps=[current, target]
+    )
     heating.subscribe(lambda q: commands.append("on" if q.value else "off"))
 
     assert heating.value is True
@@ -55,8 +59,12 @@ def test_derived_chain():
     sensor1 = quark(10.0)
     sensor2 = quark(20.0)
 
-    average = quark(lambda get: (get(sensor1) + get(sensor2)) / 2, deps=[sensor1, sensor2])
-    status = quark(lambda get: "high" if get(average) > 20 else "normal", deps=[average])
+    average = quark(
+        lambda get: (get(sensor1) + get(sensor2)) / 2, deps=[sensor1, sensor2]
+    )
+    status = quark(
+        lambda get: "high" if get(average) > 20 else "normal", deps=[average]
+    )
 
     assert status.value == "normal"
 
