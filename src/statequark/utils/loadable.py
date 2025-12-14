@@ -3,7 +3,7 @@
 from dataclasses import dataclass
 from typing import Generic, Literal, TypeAlias
 
-from ..atom import Quark
+from ..quark import Quark
 from ..types import T
 
 

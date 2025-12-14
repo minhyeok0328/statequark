@@ -6,7 +6,7 @@ from contextlib import contextmanager
 from typing import TYPE_CHECKING, Any
 
 if TYPE_CHECKING:
-    from .atom import Quark
+    from .quark import Quark
 
 # Batch update context
 _batch_lock = threading.Lock()

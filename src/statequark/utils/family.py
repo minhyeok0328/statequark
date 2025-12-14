@@ -3,7 +3,7 @@
 from collections.abc import Callable
 from typing import Generic, TypeVar
 
-from ..atom import Quark
+from ..quark import Quark
 
 K = TypeVar("K")
 V = TypeVar("V")

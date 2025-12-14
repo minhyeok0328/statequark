@@ -4,7 +4,7 @@ import threading
 import time
 from typing import Generic
 
-from ..atom import Quark
+from ..quark import Quark
 from ..types import T
 
 

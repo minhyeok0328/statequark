@@ -3,7 +3,7 @@
 from collections.abc import Callable
 from typing import Any, Generic, TypeVar
 
-from ..atom import Quark
+from ..quark import Quark
 from ..types import T
 
 S = TypeVar("S")
@@ -12,7 +12,7 @@ S = TypeVar("S")
 class SelectQuark(Quark[S], Generic[S]):
     """Quark that selects a slice of another Quark's value."""
 
-    __slots__ = ("_source", "_selector", "_equals", "_last_source")
+    __slots__ = ("_source", "_selector", "_equals")
 
     def __init__(
         self,
@@ -23,7 +23,6 @@ class SelectQuark(Quark[S], Generic[S]):
         self._source = source
         self._selector = selector
         self._equals = equals or (lambda a, b: a == b)
-        self._last_source = source.value
 
         initial = selector(source.value)
         super().__init__(initial)
