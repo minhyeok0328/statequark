@@ -1,6 +1,7 @@
 """Middleware system for Quark state changes."""
 
-from typing import Any, Callable, Generic
+from collections.abc import Callable
+from typing import Any, Generic
 
 from ..atom import Quark
 from ..types import T

@@ -1,6 +1,7 @@
 """Reducer pattern for Quark state management."""
 
-from typing import Any, Callable, Generic
+from collections.abc import Callable
+from typing import Any, Generic
 
 from ..atom import Quark
 from ..types import T

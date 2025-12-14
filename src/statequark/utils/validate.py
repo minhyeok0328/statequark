@@ -1,6 +1,7 @@
 """Validation utilities for Quark state."""
 
-from typing import Callable, Generic, Optional
+from collections.abc import Callable
+from typing import Generic
 
 from ..atom import Quark
 from ..types import T
@@ -21,7 +22,7 @@ class ValidatedQuark(Quark[T], Generic[T]):
         self,
         initial: T,
         validator: Callable[[T], bool],
-        on_invalid: Optional[Callable[[T], T]] = None,
+        on_invalid: Callable[[T], T] | None = None,
     ) -> None:
         if not validator(initial):
             raise ValidationError(f"Initial value failed validation: {initial}")
@@ -49,7 +50,7 @@ class ValidatedQuark(Quark[T], Generic[T]):
 def validate(
     initial: T,
     validator: Callable[[T], bool],
-    on_invalid: Optional[Callable[[T], T]] = None,
+    on_invalid: Callable[[T], T] | None = None,
 ) -> ValidatedQuark[T]:
     """Create a Quark with value validation."""
     return ValidatedQuark(initial, validator, on_invalid)

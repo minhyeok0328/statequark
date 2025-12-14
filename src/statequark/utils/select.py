@@ -1,6 +1,7 @@
 """Select (slice) utilities for partial state subscription."""
 
-from typing import Any, Callable, Generic, Optional, TypeVar
+from collections.abc import Callable
+from typing import Any, Generic, TypeVar
 
 from ..atom import Quark
 from ..types import T
@@ -17,7 +18,7 @@ class SelectQuark(Quark[S], Generic[S]):
         self,
         source: Quark[Any],
         selector: Callable[[Any], S],
-        equals: Optional[Callable[[S, S], bool]] = None,
+        equals: Callable[[S, S], bool] | None = None,
     ) -> None:
         self._source = source
         self._selector = selector
@@ -52,7 +53,7 @@ class SelectQuark(Quark[S], Generic[S]):
 def select(
     source: Quark[T],
     selector: Callable[[T], S],
-    equals: Optional[Callable[[S, S], bool]] = None,
+    equals: Callable[[S, S], bool] | None = None,
 ) -> SelectQuark[S]:
     """Create a Quark that selects a slice of source Quark."""
     return SelectQuark(source, selector, equals)

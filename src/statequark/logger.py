@@ -2,9 +2,8 @@
 
 import logging
 import sys
-from typing import Optional
 
-_logger: Optional[logging.Logger] = None
+_logger: logging.Logger | None = None
 _debug_enabled: bool = False
 
 

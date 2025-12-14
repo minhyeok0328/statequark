@@ -1,6 +1,7 @@
 """Derived state computation for StateQuark."""
 
-from typing import TYPE_CHECKING, Any, Callable
+from collections.abc import Callable
+from typing import TYPE_CHECKING, Any
 
 from .batch import add_to_batch, is_batch_active
 from .logger import log_error

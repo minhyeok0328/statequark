@@ -1,7 +1,6 @@
 """Configuration management for StateQuark."""
 
 from dataclasses import dataclass
-from typing import Optional
 
 from .logger import disable_debug as _disable_debug
 from .logger import enable_debug as _enable_debug
@@ -28,7 +27,7 @@ class StateQuarkConfig:
             _disable_debug()
 
 
-_config: Optional[StateQuarkConfig] = None
+_config: StateQuarkConfig | None = None
 
 
 def get_config() -> StateQuarkConfig:

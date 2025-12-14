@@ -1,8 +1,9 @@
 """Batch update system for StateQuark."""
 
 import threading
+from collections.abc import Generator
 from contextlib import contextmanager
-from typing import TYPE_CHECKING, Any, Generator
+from typing import TYPE_CHECKING, Any
 
 if TYPE_CHECKING:
     from .atom import Quark
