@@ -4,7 +4,7 @@ import json
 from pathlib import Path
 from typing import Any, Generic, Protocol, cast
 
-from ..atom import Quark
+from ..quark import Quark
 from ..types import T
 
 

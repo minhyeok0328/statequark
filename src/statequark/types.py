@@ -4,7 +4,7 @@ from collections.abc import Callable
 from typing import TYPE_CHECKING, Any, Protocol, TypeVar
 
 if TYPE_CHECKING:
-    from .core import Quark
+    from .quark import Quark
 
 T = TypeVar("T")
 T_co = TypeVar("T_co", covariant=True)

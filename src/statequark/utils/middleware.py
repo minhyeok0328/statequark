@@ -3,7 +3,7 @@
 from collections.abc import Callable
 from typing import Any, Generic
 
-from ..atom import Quark
+from ..quark import Quark
 from ..types import T
 
 Middleware = Callable[[T, T, Callable[[T], None]], None]

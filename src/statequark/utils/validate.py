@@ -3,7 +3,7 @@
 from collections.abc import Callable
 from typing import Generic
 
-from ..atom import Quark
+from ..quark import Quark
 from ..types import T
 
 

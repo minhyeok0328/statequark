@@ -7,7 +7,7 @@ from .batch import add_to_batch, is_batch_active
 from .logger import log_error
 
 if TYPE_CHECKING:
-    from .atom import Quark
+    from .quark import Quark
 
 
 class DerivedMixin:

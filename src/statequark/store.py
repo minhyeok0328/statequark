@@ -2,12 +2,13 @@
 
 import asyncio
 import threading
-from typing import TYPE_CHECKING
+from typing import TYPE_CHECKING, Any, cast
 
 from .executor import get_shared_executor
 from .logger import log_debug, log_error
 
 if TYPE_CHECKING:
+    from .quark import Quark
     from .types import ErrorHandler, QuarkCallback
 
 
@@ -69,12 +70,12 @@ class SubscriptionMixin:
     def _safe_call(self, callback: "QuarkCallback") -> None:
         """Execute callback with error handling."""
         try:
-            callback(self)
+            callback(cast("Quark[Any]", self))
         except Exception as e:
             log_error("Quark #%d: callback error: %s", self._id, e)
             if self._error_handler:
                 try:
-                    self._error_handler(e, callback, self)
+                    self._error_handler(e, callback, cast("Quark[Any]", self))
                 except Exception as he:
                     log_error("Quark #%d: error handler failed: %s", self._id, he)
 

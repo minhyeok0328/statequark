@@ -41,17 +41,7 @@ class Quark(SubscriptionMixin, DerivedMixin, Generic[T]):
         deps: list["Quark[Any]"] | None = None,
         error_handler: Optional["ErrorHandler"] = None,
     ) -> None:
-        """
-        Initialize a Quark.
-
-        Args:
-            initial_or_getter: Initial value or getter function for derived quarks.
-            deps: Dependencies for derived quarks.
-            error_handler: Custom error handler for callbacks.
-
-        Raises:
-            ValueError: If getter provided without dependencies.
-        """
+        """Create a Quark. Raises ValueError if getter has no deps."""
         with Quark._counter_lock:
             Quark._instance_counter += 1
             self._id = Quark._instance_counter

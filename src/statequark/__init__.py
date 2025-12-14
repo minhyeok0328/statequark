@@ -1,6 +1,5 @@
 """StateQuark - Atomic state management for IoT and embedded systems."""
 
-from .atom import Quark
 from .batch import batch
 from .config import (
     StateQuarkConfig,
@@ -12,6 +11,7 @@ from .config import (
 )
 from .executor import cleanup_executor
 from .factory import quark
+from .quark import Quark
 from .types import ErrorHandler, GetterFunction, QuarkCallback
 from .utils import (
     Loadable,

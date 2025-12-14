@@ -3,7 +3,7 @@
 from collections.abc import Callable
 from typing import TYPE_CHECKING, Any, Optional
 
-from .atom import Quark
+from .quark import Quark
 from .types import T
 
 if TYPE_CHECKING:
