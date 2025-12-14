@@ -1,6 +1,7 @@
 """Subscription and notification system for StateQuark."""
 
 import asyncio
+import threading
 from typing import TYPE_CHECKING
 
 from .executor import get_shared_executor
@@ -16,10 +17,11 @@ class SubscriptionMixin:
     _callbacks: list["QuarkCallback"]
     _error_handler: "ErrorHandler | None"
     _id: int
+    _lock: threading.RLock
 
     def subscribe(self, callback: "QuarkCallback") -> None:
         """Subscribe to value changes. Duplicates are ignored."""
-        with self._lock:  # type: ignore[attr-defined]
+        with self._lock:
             if callback not in self._callbacks:
                 self._callbacks.append(callback)
                 log_debug(
@@ -28,7 +30,7 @@ class SubscriptionMixin:
 
     def unsubscribe(self, callback: "QuarkCallback") -> None:
         """Unsubscribe from value changes."""
-        with self._lock:  # type: ignore[attr-defined]
+        with self._lock:
             if callback in self._callbacks:
                 self._callbacks.remove(callback)
                 log_debug(
@@ -39,7 +41,7 @@ class SubscriptionMixin:
 
     async def _notify(self) -> None:
         """Notify subscribers asynchronously."""
-        with self._lock:  # type: ignore[attr-defined]
+        with self._lock:
             callbacks = self._callbacks[:]
 
         if not callbacks:
@@ -54,7 +56,7 @@ class SubscriptionMixin:
 
     def _notify_sync(self) -> None:
         """Notify subscribers synchronously."""
-        with self._lock:  # type: ignore[attr-defined]
+        with self._lock:
             callbacks = self._callbacks[:]
 
         if not callbacks:
@@ -78,5 +80,5 @@ class SubscriptionMixin:
 
     def set_error_handler(self, handler: "ErrorHandler | None") -> None:
         """Set custom error handler for callback exceptions."""
-        with self._lock:  # type: ignore[attr-defined]
+        with self._lock:
             self._error_handler = handler

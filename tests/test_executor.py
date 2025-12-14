@@ -37,7 +37,7 @@ def test_with_quarks():
     counter.subscribe(lambda q: results.append(q.value))
 
     for i in range(5):
-        counter.set_sync(i + 1)
+        counter.set(i + 1)
 
     assert results == [1, 2, 3, 4, 5]
     counter.cleanup()

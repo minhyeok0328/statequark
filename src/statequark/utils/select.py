@@ -39,10 +39,10 @@ class SelectQuark(Quark[S], Generic[S]):
     def value(self) -> S:
         return self._selector(self._source.value)
 
-    def set_sync(self, new_value: S) -> None:
+    def set(self, new_value: S) -> None:
         raise ValueError("Cannot set select quark directly")
 
-    async def set(self, new_value: S) -> None:
+    async def set_async(self, new_value: S) -> None:
         raise ValueError("Cannot set select quark directly")
 
     def cleanup(self) -> None:

@@ -23,12 +23,12 @@ class ReducerQuark(Quark[T], Generic[T]):
     def dispatch(self, action: Any) -> None:
         """Dispatch an action to update state."""
         new_value = self._reducer(self._value, action)
-        self.set_sync(new_value)
+        self.set(new_value)
 
     async def dispatch_async(self, action: Any) -> None:
         """Dispatch an action asynchronously."""
         new_value = self._reducer(self._value, action)
-        await self.set(new_value)
+        await self.set_async(new_value)
 
 
 def quark_with_reducer(

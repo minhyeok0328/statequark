@@ -90,7 +90,7 @@ class Quark(SubscriptionMixin, DerivedMixin, Generic[T]):
                 return cast(T, self._compute())
         return self._value
 
-    def set_sync(self, new_value: T) -> None:
+    def set(self, new_value: T) -> None:
         """Set value synchronously. Raises ValueError on derived quark."""
         with self._lock:
             if self._getter:
@@ -104,7 +104,7 @@ class Quark(SubscriptionMixin, DerivedMixin, Generic[T]):
         else:
             self._notify_sync()
 
-    async def set(self, new_value: T) -> None:
+    async def set_async(self, new_value: T) -> None:
         """Set value asynchronously. Raises ValueError on derived quark."""
         with self._lock:
             if self._getter:
@@ -120,7 +120,7 @@ class Quark(SubscriptionMixin, DerivedMixin, Generic[T]):
         if self._getter:
             raise ValueError("Cannot reset derived quark")
         if self._initial is not None:
-            self.set_sync(self._initial)
+            self.set(self._initial)
 
     def cleanup(self) -> None:
         """Release resources. Essential for long-running IoT applications."""

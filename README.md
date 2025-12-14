@@ -19,7 +19,7 @@ from statequark import quark, batch
 # Basic state
 temperature = quark(20.0)
 print(temperature.value)  # 20.0
-temperature.set_sync(25.5)
+temperature.set(25.5)
 
 # Derived state (auto-updates when dependencies change)
 temp_f = quark(lambda get: get(temperature) * 9/5 + 32, deps=[temperature])
@@ -27,15 +27,15 @@ print(temp_f.value)  # 77.9
 
 # Subscriptions
 temperature.subscribe(lambda q: print(f"Temp: {q.value}"))
-temperature.set_sync(30.0)  # prints: Temp: 30.0
+temperature.set(30.0)  # prints: Temp: 30.0
 
 # Reset to initial value
 temperature.reset()  # back to 20.0
 
 # Batch updates (single notification)
 with batch():
-    sensor1.set_sync(25.0)
-    sensor2.set_sync(60.0)
+    sensor1.set(25.0)
+    sensor2.set(60.0)
 ```
 
 ## Utilities
@@ -47,7 +47,7 @@ from statequark import quark_with_storage
 
 # State survives device reboot
 config = quark_with_storage("device_config", {"threshold": 25.0})
-config.set_sync({"threshold": 30.0})  # Saved to .statequark/device_config.json
+config.set({"threshold": 30.0})  # Saved to .statequark/device_config.json
 ```
 
 ### Reducer (Action-based Updates)
@@ -105,8 +105,8 @@ display = throttle(0, 1.0)
 from statequark import history
 
 setting = history(50)
-setting.set_sync(60)
-setting.set_sync(70)
+setting.set(60)
+setting.set(70)
 setting.undo()  # 60
 setting.undo()  # 50
 setting.redo()  # 60
@@ -122,7 +122,7 @@ temp = validate(25.0, in_range(0, 100))
 
 # Auto-clamp on invalid
 temp = validate(25.0, in_range(0, 100), clamp(0, 100))
-temp.set_sync(150)  # Clamped to 100
+temp.set(150)  # Clamped to 100
 ```
 
 ### Middleware (Extensible Hooks)
@@ -134,7 +134,7 @@ storage = {}
 counter = middleware(0)
 counter.use(logger("counter"))  # Log changes
 counter.use(persist(storage, "count"))  # Save to dict
-counter.set_sync(42)  # [counter] 0 -> 42
+counter.set(42)  # [counter] 0 -> 42
 ```
 
 ### Loadable (Async State)
@@ -185,8 +185,8 @@ alert.subscribe(lambda q: gpio.output(PUMP_PIN, q.value))
 | Method | Description |
 |--------|-------------|
 | `.value` | Get current value |
-| `.set_sync(v)` | Set value (sync) |
-| `await .set(v)` | Set value (async) |
+| `.set(v)` | Set value (sync) |
+| `await .set_async(v)` | Set value (async) |
 | `.reset()` | Reset to initial |
 | `.subscribe(fn)` | Subscribe to changes |
 | `.unsubscribe(fn)` | Unsubscribe |

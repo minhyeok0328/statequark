@@ -11,11 +11,11 @@ def test_create_with_initial_value():
     assert quark("hello").value == "hello"
 
 
-def test_set_sync():
+def test_set():
     counter = quark(0)
-    counter.set_sync(1)
+    counter.set(1)
     assert counter.value == 1
-    counter.set_sync(42)
+    counter.set(42)
     assert counter.value == 42
 
 
@@ -34,14 +34,14 @@ def test_derived_quark():
     base = quark(2)
     double = quark(lambda get: get(base) * 2, deps=[base])
     assert double.value == 4
-    base.set_sync(3)
+    base.set(3)
     assert double.value == 6
 
 
 @pytest.mark.asyncio
 async def test_async_set():
     temp = quark(20.0)
-    await temp.set(25.5)
+    await temp.set_async(25.5)
     assert temp.value == 25.5
 
 
@@ -49,8 +49,8 @@ def test_subscriptions():
     values = []
     counter = quark(0)
     counter.subscribe(lambda q: values.append(q.value))
-    counter.set_sync(1)
-    counter.set_sync(2)
+    counter.set(1)
+    counter.set(2)
     assert values == [1, 2]
 
 

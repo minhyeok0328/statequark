@@ -6,9 +6,9 @@ from statequark import history
 class TestHistory:
     def test_undo_redo(self):
         q = history(0)
-        q.set_sync(1)
-        q.set_sync(2)
-        q.set_sync(3)
+        q.set(1)
+        q.set(2)
+        q.set(3)
 
         assert q.value == 3
         assert q.undo()
@@ -25,20 +25,20 @@ class TestHistory:
 
     def test_redo_at_end(self):
         q = history(0)
-        q.set_sync(1)
+        q.set(1)
         assert not q.redo()
 
     def test_history_truncation(self):
         q = history(0)
-        q.set_sync(1)
-        q.set_sync(2)
+        q.set(1)
+        q.set(2)
         q.undo()
-        q.set_sync(3)
+        q.set(3)
         assert not q.redo()
         assert q.value == 3
 
     def test_max_size(self):
         q = history(0, max_size=3)
         for i in range(1, 10):
-            q.set_sync(i)
+            q.set(i)
         assert q.history_size <= 4

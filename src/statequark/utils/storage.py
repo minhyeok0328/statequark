@@ -82,12 +82,12 @@ class StorageQuark(Quark[T]):
         initial = self._storage.get(key, default)
         super().__init__(initial)
 
-    def set_sync(self, new_value: T) -> None:
-        super().set_sync(new_value)
+    def set(self, new_value: T) -> None:
+        super().set(new_value)
         self._storage.set(self._key, new_value)
 
-    async def set(self, new_value: T) -> None:
-        await super().set(new_value)
+    async def set_async(self, new_value: T) -> None:
+        await super().set_async(new_value)
         self._storage.set(self._key, new_value)
 
 

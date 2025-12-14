@@ -1,7 +1,7 @@
 """Derived state computation for StateQuark."""
 
 from collections.abc import Callable
-from typing import TYPE_CHECKING, Any
+from typing import TYPE_CHECKING, Any, cast
 
 from .batch import add_to_batch, is_batch_active
 from .logger import log_error
@@ -16,6 +16,10 @@ class DerivedMixin:
     _getter: Callable[[Callable[["Quark[Any]"], Any]], Any] | None
     _deps: list["Quark[Any]"]
     _id: int
+
+    def _notify_sync(self) -> None:
+        """Notify subscribers synchronously. Provided by SubscriptionMixin."""
+        ...
 
     def _compute(self) -> Any:
         """Compute derived value."""
@@ -34,9 +38,9 @@ class DerivedMixin:
     def _on_dep_change(self, dep: "Quark[Any]") -> None:
         """Handle dependency change."""
         if is_batch_active():
-            add_to_batch(self._id, self)  # type: ignore[arg-type]
+            add_to_batch(self._id, cast("Quark[Any]", self))
         else:
-            self._notify_sync()  # type: ignore[attr-defined]
+            self._notify_sync()
 
     def _setup_dependencies(self) -> None:
         """Subscribe to all dependencies."""

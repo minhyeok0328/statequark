@@ -23,15 +23,15 @@ class MiddlewareQuark(Quark[T], Generic[T]):
         self._middlewares.append(middleware)
         return self
 
-    def set_sync(self, new_value: T) -> None:
+    def set(self, new_value: T) -> None:
         if not self._middlewares:
-            super().set_sync(new_value)
+            super().set(new_value)
             return
 
         def create_next(index: int) -> Callable[[T], None]:
             def next_fn(value: T) -> None:
                 if index >= len(self._middlewares):
-                    super(MiddlewareQuark, self).set_sync(value)
+                    super(MiddlewareQuark, self).set(value)
                 else:
                     self._middlewares[index](self._value, value, create_next(index + 1))
 

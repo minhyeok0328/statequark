@@ -30,6 +30,6 @@ class TestLoadable:
         source = quark(1)
         loaded = loadable(source)
 
-        source.set_sync(2)
+        source.set(2)
         assert loaded.value.state == "hasData"
         assert loaded.value.data == 2
