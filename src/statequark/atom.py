@@ -1,7 +1,8 @@
 """Core Quark atom implementation for atomic state management."""
 
 import threading
-from typing import TYPE_CHECKING, Any, Callable, Generic, Optional, Union, cast
+from collections.abc import Callable
+from typing import TYPE_CHECKING, Any, Generic, Optional, cast
 
 from .batch import add_to_batch, is_batch_active
 from .derived import DerivedMixin
@@ -36,8 +37,8 @@ class Quark(SubscriptionMixin, DerivedMixin, Generic[T]):
 
     def __init__(
         self,
-        initial_or_getter: Union[T, Callable[[Callable[["Quark[Any]"], Any]], T]],
-        deps: Optional[list["Quark[Any]"]] = None,
+        initial_or_getter: T | Callable[[Callable[["Quark[Any]"], Any]], T],
+        deps: list["Quark[Any]"] | None = None,
         error_handler: Optional["ErrorHandler"] = None,
     ) -> None:
         """
@@ -63,10 +64,10 @@ class Quark(SubscriptionMixin, DerivedMixin, Generic[T]):
         if callable(initial_or_getter):
             if not self._deps:
                 raise ValueError("Derived quarks require at least one dependency")
-            self._getter: Optional[Callable[[Callable[["Quark[Any]"], Any]], T]] = (
+            self._getter: Callable[[Callable[[Quark[Any]], Any]], T] | None = (
                 initial_or_getter
             )
-            self._initial: Optional[T] = None
+            self._initial: T | None = None
             self._value: T = self._compute()
 
             log_debug(

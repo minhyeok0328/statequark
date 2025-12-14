@@ -26,7 +26,7 @@ class ExecutorManager:
         if hasattr(self, "_initialized") and self._initialized:
             return
 
-        self._executor: Optional[ThreadPoolExecutor] = None
+        self._executor: ThreadPoolExecutor | None = None
         self._executor_lock = threading.Lock()
         self._shutdown = False
         self._initialized: bool = True
@@ -76,7 +76,7 @@ class ExecutorManager:
             self._shutdown = False
 
 
-_executor_manager: Optional[ExecutorManager] = None
+_executor_manager: ExecutorManager | None = None
 _manager_lock = threading.Lock()
 
 

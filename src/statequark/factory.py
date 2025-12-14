@@ -1,6 +1,7 @@
 """Factory functions and utilities for StateQuark."""
 
-from typing import TYPE_CHECKING, Any, Callable, Optional, Union
+from collections.abc import Callable
+from typing import TYPE_CHECKING, Any, Optional
 
 from .atom import Quark
 from .types import T
@@ -10,8 +11,8 @@ if TYPE_CHECKING:
 
 
 def quark(
-    initial_or_getter: Union[T, Callable[[Callable[[Quark[Any]], Any]], T]],
-    deps: Optional[list[Quark[Any]]] = None,
+    initial_or_getter: T | Callable[[Callable[[Quark[Any]], Any]], T],
+    deps: list[Quark[Any]] | None = None,
     error_handler: Optional["ErrorHandler"] = None,
 ) -> Quark[T]:
     """

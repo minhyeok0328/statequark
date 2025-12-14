@@ -1,6 +1,7 @@
 """Type definitions for StateQuark."""
 
-from typing import TYPE_CHECKING, Any, Callable, Protocol, TypeVar
+from collections.abc import Callable
+from typing import TYPE_CHECKING, Any, Protocol, TypeVar
 
 if TYPE_CHECKING:
     from .core import Quark

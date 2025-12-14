@@ -1,7 +1,7 @@
 """Loadable wrapper for async state handling."""
 
 from dataclasses import dataclass
-from typing import Generic, Literal, Union
+from typing import Generic, Literal, TypeAlias
 
 from ..atom import Quark
 from ..types import T
@@ -24,7 +24,7 @@ class LoadableHasError:
     error: Exception = None  # type: ignore
 
 
-Loadable = Union[LoadableLoading, LoadableHasData[T], LoadableHasError]
+Loadable: TypeAlias = LoadableLoading | LoadableHasData[T] | LoadableHasError
 
 
 class LoadableQuark(Quark[Loadable[T]], Generic[T]):

@@ -2,7 +2,7 @@
 
 import json
 from pathlib import Path
-from typing import Any, Generic, Optional, Protocol, Union, cast
+from typing import Any, Generic, Protocol, cast
 
 from ..atom import Quark
 from ..types import T
@@ -18,7 +18,7 @@ class Storage(Protocol[T]):
 class FileStorage(Generic[T]):
     """JSON file-based storage for IoT devices."""
 
-    def __init__(self, directory: Union[str, Path] = ".statequark") -> None:
+    def __init__(self, directory: str | Path = ".statequark") -> None:
         self._dir = Path(directory)
         self._dir.mkdir(parents=True, exist_ok=True)
 
@@ -30,7 +30,7 @@ class FileStorage(Generic[T]):
         if not path.exists():
             return default
         try:
-            with open(path, "r") as f:
+            with open(path) as f:
                 return cast(T, json.load(f))
         except (json.JSONDecodeError, OSError):
             return default
@@ -56,7 +56,7 @@ class MemoryStorage(Generic[T]):
         self._data[key] = value
 
 
-_default_storage: Optional[FileStorage[Any]] = None
+_default_storage: FileStorage[Any] | None = None
 
 
 def get_default_storage() -> FileStorage[Any]:
@@ -75,7 +75,7 @@ class StorageQuark(Quark[T]):
         self,
         key: str,
         default: T,
-        storage: Optional[Storage[T]] = None,
+        storage: Storage[T] | None = None,
     ) -> None:
         self._storage: Storage[T] = storage or get_default_storage()
         self._key = key
@@ -94,7 +94,7 @@ class StorageQuark(Quark[T]):
 def quark_with_storage(
     key: str,
     default: T,
-    storage: Optional[Storage[T]] = None,
+    storage: Storage[T] | None = None,
 ) -> StorageQuark[T]:
     """Create a Quark that persists to storage."""
     return StorageQuark(key, default, storage)

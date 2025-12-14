@@ -1,6 +1,7 @@
 """QuarkFamily for dynamic Quark creation."""
 
-from typing import Callable, Generic, Optional, TypeVar
+from collections.abc import Callable
+from typing import Generic, TypeVar
 
 from ..atom import Quark
 
@@ -16,7 +17,7 @@ class QuarkFamily(Generic[K, V]):
     def __init__(
         self,
         factory: Callable[[K], Quark[V]],
-        equals: Optional[Callable[[K, K], bool]] = None,
+        equals: Callable[[K, K], bool] | None = None,
     ) -> None:
         self._factory = factory
         self._cache: dict[K, Quark[V]] = {}
@@ -73,7 +74,7 @@ class QuarkFamily(Generic[K, V]):
 
 def quark_family(
     factory: Callable[[K], Quark[V]],
-    equals: Optional[Callable[[K, K], bool]] = None,
+    equals: Callable[[K, K], bool] | None = None,
 ) -> QuarkFamily[K, V]:
     """Create a QuarkFamily for dynamic Quark management."""
     return QuarkFamily(factory, equals)
