@@ -27,11 +27,11 @@ def test_iot_monitoring_system():
 
     assert system_status.value == "normal"
 
-    temperature.set_sync(35.0)
+    temperature.set(35.0)
     assert system_status.value == "warning"
     assert "warning" in alerts
 
-    battery.set_sync(15.0)
+    battery.set(15.0)
     assert system_status.value == "critical"
 
 
@@ -47,10 +47,10 @@ def test_thermostat_control():
 
     assert heating.value is True
 
-    current.set_sync(18.0)
+    current.set(18.0)
     assert commands[-1] == "on"
 
-    current.set_sync(22.5)
+    current.set(22.5)
     assert heating.value is False
     assert commands[-1] == "off"
 
@@ -68,7 +68,7 @@ def test_derived_chain():
 
     assert status.value == "normal"
 
-    sensor1.set_sync(30.0)
+    sensor1.set(30.0)
     assert average.value == 25.0
     assert status.value == "high"
 
@@ -78,7 +78,7 @@ async def test_async_sensor_network():
     sensors = [quark(0.0) for _ in range(3)]
     total = quark(lambda get: sum(get(s) for s in sensors), deps=sensors)
 
-    await asyncio.gather(*[s.set(i * 10.0) for i, s in enumerate(sensors)])
+    await asyncio.gather(*[s.set_async(i * 10.0) for i, s in enumerate(sensors)])
 
     assert total.value == 30.0
 
@@ -90,9 +90,9 @@ def test_cleanup_removes_subscriptions():
 
     derived.subscribe(lambda q: updates.append(q.value))
 
-    base.set_sync(20)
+    base.set(20)
     assert len(updates) == 1
 
     derived.cleanup()
-    base.set_sync(30)
+    base.set(30)
     assert len(updates) == 1  # No updates after cleanup

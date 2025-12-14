@@ -12,7 +12,7 @@ def test_thread_safety_basic():
 
     def worker():
         for _ in range(100):
-            counter.set_sync(counter.value + 1)
+            counter.set(counter.value + 1)
 
     threads = [threading.Thread(target=worker) for _ in range(5)]
     for t in threads:
@@ -34,7 +34,7 @@ def test_concurrent_subscriptions():
 
     def worker(start):
         for i in range(10):
-            sensor.set_sync(start + i)
+            sensor.set(start + i)
 
     threads = [threading.Thread(target=worker, args=(i * 10,)) for i in range(3)]
     for t in threads:
@@ -57,7 +57,7 @@ def test_derived_thread_safety():
 
     def worker():
         for i in range(50):
-            base.set_sync(i)
+            base.set(i)
 
     threads = [threading.Thread(target=worker) for _ in range(3)]
     for t in threads:
@@ -72,7 +72,7 @@ def test_thread_pool_executor():
     counter = quark(0)
 
     def task():
-        counter.set_sync(counter.value + 1)
+        counter.set(counter.value + 1)
 
     with ThreadPoolExecutor(max_workers=5) as executor:
         futures = [executor.submit(task) for _ in range(100)]
@@ -90,12 +90,12 @@ def test_deadlock_prevention():
 
     def worker1():
         for i in range(10):
-            q1.set_sync(i)
+            q1.set(i)
             time.sleep(0.001)
 
     def worker2():
         for i in range(10):
-            q2.set_sync(i)
+            q2.set(i)
             time.sleep(0.001)
 
     t1 = threading.Thread(target=worker1)

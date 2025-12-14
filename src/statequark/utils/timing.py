@@ -20,7 +20,7 @@ class DebouncedQuark(Quark[T], Generic[T]):
         self._pending: T | None = None
         self._timer_lock = threading.Lock()
 
-    def set_sync(self, new_value: T) -> None:
+    def set(self, new_value: T) -> None:
         with self._timer_lock:
             self._pending = new_value
             if self._timer:
@@ -31,7 +31,7 @@ class DebouncedQuark(Quark[T], Generic[T]):
     def _flush(self) -> None:
         with self._timer_lock:
             if self._pending is not None:
-                super().set_sync(self._pending)
+                super().set(self._pending)
                 self._pending = None
                 self._timer = None
 
@@ -61,18 +61,18 @@ class ThrottledQuark(Quark[T], Generic[T]):
         self._last_update = 0.0
         self._throttle_lock = threading.Lock()
 
-    def set_sync(self, new_value: T) -> None:
+    def set(self, new_value: T) -> None:
         with self._throttle_lock:
             now = time.monotonic()
             if now - self._last_update >= self._interval:
                 self._last_update = now
-                super().set_sync(new_value)
+                super().set(new_value)
 
     def force_set(self, new_value: T) -> None:
         """Force update regardless of throttle."""
         with self._throttle_lock:
             self._last_update = time.monotonic()
-        super().set_sync(new_value)
+        super().set(new_value)
 
 
 def debounce(initial: T, delay: float) -> DebouncedQuark[T]:

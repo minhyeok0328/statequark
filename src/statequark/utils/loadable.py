@@ -14,14 +14,14 @@ class LoadableLoading:
 
 @dataclass(frozen=True, slots=True)
 class LoadableHasData(Generic[T]):
+    data: T
     state: Literal["hasData"] = "hasData"
-    data: T = None  # type: ignore
 
 
 @dataclass(frozen=True, slots=True)
 class LoadableHasError:
+    error: Exception
     state: Literal["hasError"] = "hasError"
-    error: Exception = None  # type: ignore
 
 
 Loadable: TypeAlias = LoadableLoading | LoadableHasData[T] | LoadableHasError

@@ -7,7 +7,7 @@ from statequark import Quark, batch, quark
 
 def test_reset_basic():
     temp = quark(20.0)
-    temp.set_sync(99.9)
+    temp.set(99.9)
     assert temp.value == 99.9
     temp.reset()
     assert temp.value == 20.0
@@ -15,7 +15,7 @@ def test_reset_basic():
 
 def test_reset_with_string():
     name = quark("default")
-    name.set_sync("changed")
+    name.set("changed")
     name.reset()
     assert name.value == "default"
 
@@ -40,10 +40,10 @@ def test_batch_reduces_notifications():
     b.subscribe(counter)
 
     with batch():
-        a.set_sync(1)
-        a.set_sync(2)
-        a.set_sync(3)
-        b.set_sync(10)
+        a.set(1)
+        a.set(2)
+        a.set(3)
+        b.set(10)
 
     assert a.value == 3
     assert b.value == 10
@@ -63,8 +63,8 @@ def test_batch_with_derived():
     derived.subscribe(track)
 
     with batch():
-        base1.set_sync(10)
-        base2.set_sync(20)
+        base1.set(10)
+        base2.set(20)
 
     assert derived.value == 30
     # Derived notified per dependency change (base1, base2)
@@ -88,7 +88,7 @@ def test_batch_exception_still_notifies():
 
     try:
         with batch():
-            a.set_sync(5)
+            a.set(5)
             raise RuntimeError("test error")
     except RuntimeError:
         pass

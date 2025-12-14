@@ -31,8 +31,8 @@ def batch() -> Generator[None, None, None]:
 
     Example:
         with batch():
-            sensor1.set_sync(25.0)
-            sensor2.set_sync(60.0)
+            sensor1.set(25.0)
+            sensor2.set(60.0)
             # Callbacks fire once at end, not twice
     """
     _batch_active.active = True

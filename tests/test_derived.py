@@ -10,7 +10,7 @@ def test_simple_derived():
     double = quark(lambda get: get(base) * 2, deps=[base])
 
     assert double.value == 4
-    base.set_sync(3)
+    base.set(3)
     assert double.value == 6
 
 
@@ -26,7 +26,7 @@ def test_multiple_dependencies():
     )
 
     assert comfort.value == "ok"
-    temp.set_sync(30.0)
+    temp.set(30.0)
     assert comfort.value == "bad"
 
 
@@ -36,7 +36,7 @@ def test_nested_derived():
     quadrupled = quark(lambda get: get(doubled) * 2, deps=[doubled])
 
     assert quadrupled.value == 8
-    base.set_sync(3)
+    base.set(3)
     assert quadrupled.value == 12
 
 
@@ -45,7 +45,7 @@ def test_cannot_set_derived():
     derived = quark(lambda get: get(base) * 2, deps=[base])
 
     with pytest.raises(ValueError):
-        derived.set_sync(10)
+        derived.set(10)
 
 
 def test_conditional_logic():
@@ -63,7 +63,7 @@ def test_conditional_logic():
     alarm = quark(status, deps=[value, threshold])
 
     assert alarm.value == "NORMAL"
-    value.set_sync(65.0)
+    value.set(65.0)
     assert alarm.value == "WARNING"
-    value.set_sync(80.0)
+    value.set(80.0)
     assert alarm.value == "ALARM"

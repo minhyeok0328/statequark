@@ -18,13 +18,13 @@ class HistoryQuark(Quark[T], Generic[T]):
         self._max_size = max_size
         self._position = 0
 
-    def set_sync(self, new_value: T) -> None:
+    def set(self, new_value: T) -> None:
         # Truncate future history if we're not at the end
         while self._position > 0:
             self._history.popleft()
             self._position -= 1
         self._history.appendleft(new_value)
-        super().set_sync(new_value)
+        super().set(new_value)
 
     def undo(self) -> bool:
         """Go back to previous value. Returns False if at oldest."""

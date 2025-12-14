@@ -19,10 +19,10 @@ class TestSelect:
         changes = []
         temp.subscribe(lambda x: changes.append(x.value))
 
-        sensor.set_sync({"temp": 25.0, "humidity": 70})
+        sensor.set({"temp": 25.0, "humidity": 70})
         assert len(changes) == 0
 
-        sensor.set_sync({"temp": 26.0, "humidity": 70})
+        sensor.set({"temp": 26.0, "humidity": 70})
         assert changes == [26.0]
 
     def test_select_cannot_be_set(self):
@@ -30,7 +30,7 @@ class TestSelect:
         doubled = select(source, lambda x: x * 2)
 
         with pytest.raises(ValueError):
-            doubled.set_sync(100)
+            doubled.set(100)
 
     def test_select_cleanup(self):
         source = quark(10)

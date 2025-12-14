@@ -30,19 +30,19 @@ class ValidatedQuark(Quark[T], Generic[T]):
         self._validator = validator
         self._on_invalid = on_invalid
 
-    def set_sync(self, new_value: T) -> None:
+    def set(self, new_value: T) -> None:
         if self._validator(new_value):
-            super().set_sync(new_value)
+            super().set(new_value)
         elif self._on_invalid:
-            super().set_sync(self._on_invalid(new_value))
+            super().set(self._on_invalid(new_value))
         else:
             raise ValidationError(f"Value failed validation: {new_value}")
 
-    async def set(self, new_value: T) -> None:
+    async def set_async(self, new_value: T) -> None:
         if self._validator(new_value):
-            await super().set(new_value)
+            await super().set_async(new_value)
         elif self._on_invalid:
-            await super().set(self._on_invalid(new_value))
+            await super().set_async(self._on_invalid(new_value))
         else:
             raise ValidationError(f"Value failed validation: {new_value}")
 
