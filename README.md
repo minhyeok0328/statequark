@@ -194,17 +194,24 @@ alert.subscribe(lambda q: gpio.output(PUMP_PIN, q.value))
 
 ### Utilities
 
+**Create new quarks** (pass initial value):
+
 | Function | Description |
 |----------|-------------|
 | `quark_with_storage(key, default)` | Persistent state |
 | `quark_with_reducer(init, reducer)` | Action-based state |
-| `select(source, selector)` | Partial subscription |
 | `quark_family(factory)` | Dynamic quark creation |
 | `debounce(init, delay)` | Debounced updates |
 | `throttle(init, interval)` | Throttled updates |
 | `history(init, max_size)` | Undo/redo support |
 | `validate(init, validator, on_invalid)` | Value validation |
 | `middleware(init)` | Middleware pipeline |
+
+**Wrap existing quarks** (pass source quark):
+
+| Function | Description |
+|----------|-------------|
+| `select(source, selector)` | Partial subscription (read-only) |
 | `loadable(source)` | Async state wrapper |
 
 ## License

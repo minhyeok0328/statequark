@@ -67,9 +67,9 @@ def test_batch_with_derived():
         base2.set(20)
 
     assert derived.value == 30
-    # Derived notified per dependency change (base1, base2)
-    assert len(notifications) == 2
-    assert notifications[-1] == 30
+    # Batch optimization: derived quark notified only once with final value
+    assert len(notifications) == 1
+    assert notifications[0] == 30
 
 
 def test_batch_empty():
