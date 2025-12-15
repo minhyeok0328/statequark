@@ -19,13 +19,19 @@ class Storage(Protocol[T]):
 class FileStorage(Generic[T]):
     """JSON file-based storage for IoT devices."""
 
-    def __init__(self, directory: str | Path = ".statequark") -> None:
+    def __init__(
+        self,
+        directory: str | Path = ".statequark",
+        sanitize_keys: bool = True,
+    ) -> None:
         self._dir = Path(directory)
         self._dir.mkdir(parents=True, exist_ok=True)
+        self._sanitize_keys = sanitize_keys
 
     def _path(self, key: str) -> Path:
-        safe_key = key.replace("/", "_").replace("\\", "_").replace("..", "_")
-        path = (self._dir / f"{safe_key}.json").resolve()
+        if self._sanitize_keys:
+            key = key.replace("/", "_").replace("\\", "_").replace("..", "_")
+        path = (self._dir / f"{key}.json").resolve()
         if not path.is_relative_to(self._dir.resolve()):
             raise ValueError(f"Invalid storage key: {key}")
         return path
