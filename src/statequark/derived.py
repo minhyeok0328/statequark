@@ -15,6 +15,7 @@ class DerivedMixin:
 
     _getter: Callable[[Callable[["Quark[Any]"], Any]], Any] | None
     _deps: list["Quark[Any]"]
+    _unsubscribers: list[Callable[[], None]]
     _id: int
 
     def _notify_sync(self) -> None:
@@ -43,16 +44,18 @@ class DerivedMixin:
             self._notify_sync()
 
     def _setup_dependencies(self) -> None:
-        """Subscribe to all dependencies."""
+        """Subscribe to all dependencies and store unsubscribe functions."""
         for dep in self._deps:
-            dep.subscribe(self._on_dep_change)
+            unsub = dep.subscribe(self._on_dep_change)
+            self._unsubscribers.append(unsub)
 
     def _cleanup_dependencies(self) -> None:
         """Unsubscribe from all dependencies."""
         from .logger import log_warning
 
-        for dep in self._deps:
+        for unsub in self._unsubscribers:
             try:
-                dep.unsubscribe(self._on_dep_change)
+                unsub()
             except Exception as e:
                 log_warning("Quark #%d: cleanup error: %s", self._id, e)
+        self._unsubscribers.clear()

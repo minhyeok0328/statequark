@@ -2,6 +2,7 @@
 
 import asyncio
 import threading
+from collections.abc import Callable
 from typing import TYPE_CHECKING, Any, cast
 
 from .executor import get_shared_executor
@@ -20,8 +21,8 @@ class SubscriptionMixin:
     _id: int
     _lock: threading.RLock
 
-    def subscribe(self, callback: "QuarkCallback") -> None:
-        """Subscribe to value changes. Duplicates are ignored."""
+    def subscribe(self, callback: "QuarkCallback") -> Callable[[], None]:
+        """Subscribe to value changes. Returns unsubscribe function."""
         with self._lock:
             if callback not in self._callbacks:
                 self._callbacks.append(callback)
@@ -29,16 +30,17 @@ class SubscriptionMixin:
                     "Quark #%d: +subscriber (%d total)", self._id, len(self._callbacks)
                 )
 
-    def unsubscribe(self, callback: "QuarkCallback") -> None:
-        """Unsubscribe from value changes."""
-        with self._lock:
-            if callback in self._callbacks:
-                self._callbacks.remove(callback)
-                log_debug(
-                    "Quark #%d: -subscriber (%d remaining)",
-                    self._id,
-                    len(self._callbacks),
-                )
+        def unsubscribe() -> None:
+            with self._lock:
+                if callback in self._callbacks:
+                    self._callbacks.remove(callback)
+                    log_debug(
+                        "Quark #%d: -subscriber (%d remaining)",
+                        self._id,
+                        len(self._callbacks),
+                    )
+
+        return unsubscribe
 
     async def _notify(self) -> None:
         """Notify subscribers asynchronously."""

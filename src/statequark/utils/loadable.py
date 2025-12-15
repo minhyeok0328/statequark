@@ -30,12 +30,12 @@ Loadable: TypeAlias = LoadableLoading | LoadableHasData[T] | LoadableHasError
 class LoadableQuark(Quark[Loadable[T]], Generic[T]):
     """Quark that wraps async values with loading/error states."""
 
-    __slots__ = ("_source",)
+    __slots__ = ("_source", "_unsub")
 
     def __init__(self, source: Quark[T]) -> None:
         self._source = source
         super().__init__(LoadableHasData(data=source.value))
-        source.subscribe(self._on_source_change)
+        self._unsub = source.subscribe(self._on_source_change)
 
     def _on_source_change(self, src: Quark[T]) -> None:
         self._value = LoadableHasData(data=src.value)
@@ -57,7 +57,7 @@ class LoadableQuark(Quark[Loadable[T]], Generic[T]):
         self._notify_sync()
 
     def cleanup(self) -> None:
-        self._source.unsubscribe(self._on_source_change)
+        self._unsub()
         super().cleanup()
 
 

@@ -28,6 +28,7 @@ class Quark(SubscriptionMixin, DerivedMixin, Generic[T]):
         "_lock",
         "_getter",
         "_deps",
+        "_unsubscribers",
         "_error_handler",
         "_id",
     )
@@ -49,6 +50,7 @@ class Quark(SubscriptionMixin, DerivedMixin, Generic[T]):
         self._lock = threading.RLock()
         self._callbacks: list[QuarkCallback] = []
         self._deps: list[Quark[Any]] = deps or []
+        self._unsubscribers: list[Callable[[], None]] = []
         self._error_handler = error_handler
 
         if callable(initial_or_getter):
@@ -79,6 +81,14 @@ class Quark(SubscriptionMixin, DerivedMixin, Generic[T]):
             with self._lock:
                 return cast(T, self._compute())
         return self._value
+
+    @value.setter
+    def value(self, new_value: T) -> None:
+        """Prevent direct assignment with helpful error message."""
+        raise AttributeError(
+            "Cannot assign to 'value' directly. Use .set(value) instead. "
+            "Example: quark.set(new_value)"
+        )
 
     def set(self, new_value: T) -> None:
         """Set value synchronously. Raises ValueError on derived quark."""

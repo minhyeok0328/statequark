@@ -39,10 +39,25 @@ def batch() -> Generator[None, None, None]:
     try:
         yield
     finally:
-        _batch_active.active = False
+        # Keep batch active during notifications to prevent cascading updates
+        # from derived quarks causing additional immediate notifications
         with _batch_lock:
             pending = list(_batch_pending.values())
             _batch_pending.clear()
 
+        # Notify all pending quarks while batch is still active
         for q in pending:
             q._notify_sync()
+
+        # Process any derived quark updates that were queued during notifications
+        while True:
+            with _batch_lock:
+                if not _batch_pending:
+                    break
+                pending = list(_batch_pending.values())
+                _batch_pending.clear()
+            for q in pending:
+                q._notify_sync()
+
+        # Only deactivate batch after all notifications are complete
+        _batch_active.active = False

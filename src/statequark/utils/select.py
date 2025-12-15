@@ -12,7 +12,7 @@ S = TypeVar("S")
 class SelectQuark(Quark[S], Generic[S]):
     """Quark that selects a slice of another Quark's value."""
 
-    __slots__ = ("_source", "_selector", "_equals")
+    __slots__ = ("_source", "_selector", "_equals", "_unsub")
 
     def __init__(
         self,
@@ -26,7 +26,7 @@ class SelectQuark(Quark[S], Generic[S]):
 
         initial = selector(source.value)
         super().__init__(initial)
-        source.subscribe(self._on_source_change)
+        self._unsub = source.subscribe(self._on_source_change)
 
     def _on_source_change(self, src: Quark[Any]) -> None:
         new_slice = self._selector(src.value)
@@ -38,6 +38,10 @@ class SelectQuark(Quark[S], Generic[S]):
     def value(self) -> S:
         return self._selector(self._source.value)
 
+    @value.setter
+    def value(self, new_value: S) -> None:
+        raise AttributeError("Cannot assign to select quark. It is read-only.")
+
     def set(self, new_value: S) -> None:
         raise ValueError("Cannot set select quark directly")
 
@@ -45,7 +49,7 @@ class SelectQuark(Quark[S], Generic[S]):
         raise ValueError("Cannot set select quark directly")
 
     def cleanup(self) -> None:
-        self._source.unsubscribe(self._on_source_change)
+        self._unsub()
         super().cleanup()
 
 
