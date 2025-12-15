@@ -25,9 +25,10 @@ temperature.set(25.5)
 temp_f = quark(lambda get: get(temperature) * 9/5 + 32, deps=[temperature])
 print(temp_f.value)  # 77.9
 
-# Subscriptions
-temperature.subscribe(lambda q: print(f"Temp: {q.value}"))
+# Subscriptions (returns unsubscribe function)
+unsub = temperature.subscribe(lambda q: print(f"Temp: {q.value}"))
 temperature.set(30.0)  # prints: Temp: 30.0
+unsub()  # stop listening
 
 # Reset to initial value
 temperature.reset()  # back to 20.0
@@ -188,8 +189,7 @@ alert.subscribe(lambda q: gpio.output(PUMP_PIN, q.value))
 | `.set(v)` | Set value (sync) |
 | `await .set_async(v)` | Set value (async) |
 | `.reset()` | Reset to initial |
-| `.subscribe(fn)` | Subscribe to changes |
-| `.unsubscribe(fn)` | Unsubscribe |
+| `unsub = .subscribe(fn)` | Subscribe, returns unsubscribe function |
 | `.cleanup()` | Release resources |
 
 ### Utilities

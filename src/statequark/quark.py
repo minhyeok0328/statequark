@@ -28,6 +28,7 @@ class Quark(SubscriptionMixin, DerivedMixin, Generic[T]):
         "_lock",
         "_getter",
         "_deps",
+        "_unsubscribers",
         "_error_handler",
         "_id",
     )
@@ -49,6 +50,7 @@ class Quark(SubscriptionMixin, DerivedMixin, Generic[T]):
         self._lock = threading.RLock()
         self._callbacks: list[QuarkCallback] = []
         self._deps: list[Quark[Any]] = deps or []
+        self._unsubscribers: list[Callable[[], None]] = []
         self._error_handler = error_handler
 
         if callable(initial_or_getter):

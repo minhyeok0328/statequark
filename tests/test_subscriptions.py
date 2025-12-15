@@ -21,9 +21,22 @@ def test_unsubscribe():
     def cb(q):
         values.append(q.value)
 
-    counter.subscribe(cb)
+    unsub = counter.subscribe(cb)
     counter.set(1)
-    counter.unsubscribe(cb)
+    unsub()  # unsubscribe
+    counter.set(2)
+
+    assert values == [1]
+
+
+def test_unsubscribe_with_lambda():
+    """Test that lambdas can be unsubscribed using returned function."""
+    values = []
+    counter = quark(0)
+
+    unsub = counter.subscribe(lambda q: values.append(q.value))
+    counter.set(1)
+    unsub()
     counter.set(2)
 
     assert values == [1]
