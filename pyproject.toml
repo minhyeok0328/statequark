@@ -45,6 +45,12 @@ dev = [
 "Homepage" = "https://github.com/minhyeok0328/statequark"
 "Repository" = "https://github.com/minhyeok0328/statequark"
 
+[tool.setuptools.packages.find]
+where = ["src"]
+
+[tool.setuptools.package-data]
+statequark = ["py.typed"]
+
 [tool.pytest.ini_options]
 testpaths = ["tests"]
 python_files = ["test_*.py"]
