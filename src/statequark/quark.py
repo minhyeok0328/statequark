@@ -82,14 +82,6 @@ class Quark(SubscriptionMixin, DerivedMixin, Generic[T]):
                 return cast(T, self._compute())
         return self._value
 
-    @value.setter
-    def value(self, new_value: T) -> None:
-        """Prevent direct assignment with helpful error message."""
-        raise AttributeError(
-            "Cannot assign to 'value' directly. Use .set(value) instead. "
-            "Example: quark.set(new_value)"
-        )
-
     def set(self, new_value: T) -> None:
         """Set value synchronously. Raises ValueError on derived quark."""
         with self._lock:
