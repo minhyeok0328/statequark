@@ -4,6 +4,7 @@ import json
 from pathlib import Path
 from typing import Any, Generic, Protocol, cast
 
+from ..logger import log_warning
 from ..quark import Quark
 from ..types import T
 
@@ -23,7 +24,11 @@ class FileStorage(Generic[T]):
         self._dir.mkdir(parents=True, exist_ok=True)
 
     def _path(self, key: str) -> Path:
-        return self._dir / f"{key}.json"
+        safe_key = key.replace("/", "_").replace("\\", "_").replace("..", "_")
+        path = (self._dir / f"{safe_key}.json").resolve()
+        if not path.is_relative_to(self._dir.resolve()):
+            raise ValueError(f"Invalid storage key: {key}")
+        return path
 
     def get(self, key: str, default: T) -> T:
         path = self._path(key)
@@ -39,8 +44,8 @@ class FileStorage(Generic[T]):
         try:
             with open(self._path(key), "w") as f:
                 json.dump(value, f)
-        except OSError:
-            pass
+        except OSError as e:
+            log_warning("Failed to write storage key '%s': %s", key, e)
 
 
 class MemoryStorage(Generic[T]):
