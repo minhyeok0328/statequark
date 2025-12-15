@@ -4,6 +4,7 @@ import json
 from pathlib import Path
 from typing import Any, Generic, Protocol, cast
 
+from ..logger import log_warning
 from ..quark import Quark
 from ..types import T
 
@@ -18,12 +19,22 @@ class Storage(Protocol[T]):
 class FileStorage(Generic[T]):
     """JSON file-based storage for IoT devices."""
 
-    def __init__(self, directory: str | Path = ".statequark") -> None:
+    def __init__(
+        self,
+        directory: str | Path = ".statequark",
+        sanitize_keys: bool = True,
+    ) -> None:
         self._dir = Path(directory)
         self._dir.mkdir(parents=True, exist_ok=True)
+        self._sanitize_keys = sanitize_keys
 
     def _path(self, key: str) -> Path:
-        return self._dir / f"{key}.json"
+        if self._sanitize_keys:
+            key = key.replace("/", "_").replace("\\", "_").replace("..", "_")
+        path = (self._dir / f"{key}.json").resolve()
+        if not path.is_relative_to(self._dir.resolve()):
+            raise ValueError(f"Invalid storage key: {key}")
+        return path
 
     def get(self, key: str, default: T) -> T:
         path = self._path(key)
@@ -39,8 +50,8 @@ class FileStorage(Generic[T]):
         try:
             with open(self._path(key), "w") as f:
                 json.dump(value, f)
-        except OSError:
-            pass
+        except OSError as e:
+            log_warning("Failed to write storage key '%s': %s", key, e)
 
 
 class MemoryStorage(Generic[T]):
