@@ -86,7 +86,7 @@ def test_generic_and_inferred_equivalence():
     inferred = quark(100)
     explicit = quark[int](100)
 
-    assert type(inferred) == type(explicit)
+    assert type(inferred) is type(explicit)
     assert inferred.value == explicit.value
 
     inferred.set(200)
