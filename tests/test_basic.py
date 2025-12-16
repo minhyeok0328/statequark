@@ -58,3 +58,37 @@ def test_import_compatibility():
     q = quark(42)
     assert isinstance(q, Quark)
     assert isinstance(__version__, str)
+
+
+def test_generic_syntax():
+    """Test quark[Type](value) syntax."""
+    # Basic generic syntax
+    count = quark[int](0)
+    assert count.value == 0
+    count.set(42)
+    assert count.value == 42
+
+    # With None initial value
+    name = quark[str | None](None)
+    assert name.value is None
+    name.set("hello")
+    assert name.value == "hello"
+
+    # Complex types
+    items = quark[list[str]]([])
+    assert items.value == []
+    items.set(["a", "b"])
+    assert items.value == ["a", "b"]
+
+
+def test_generic_and_inferred_equivalence():
+    """Both syntaxes should produce identical Quark instances."""
+    inferred = quark(100)
+    explicit = quark[int](100)
+
+    assert type(inferred) is type(explicit)
+    assert inferred.value == explicit.value
+
+    inferred.set(200)
+    explicit.set(200)
+    assert inferred.value == explicit.value

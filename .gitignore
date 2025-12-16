@@ -6,3 +6,5 @@ dist/
 .mypy_cache/
 .statequark/
 .pytest_cache/
+.venv/
+uv.lock
