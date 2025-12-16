@@ -61,34 +61,11 @@ class QuarkFactory:
         deps: list[Quark[Any]] | None = None,
         error_handler: Optional["ErrorHandler"] = None,
     ) -> Quark[T]:
-        """
-        Create a new Quark instance.
-
-        Args:
-            initial_or_getter: Initial value or getter function for derived quarks.
-            deps: Dependencies for derived quarks.
-            error_handler: Custom error handler for callbacks.
-
-        Returns:
-            A new Quark instance.
-
-        Example:
-            # Basic quark
-            count = quark(0)
-
-            # Derived quark
-            doubled = quark(lambda get: get(count) * 2, deps=[count])
-        """
+        """Create a new Quark instance."""
         return Quark(initial_or_getter, deps, error_handler)
 
     def __getitem__(self, type_hint: type[T]) -> _TypedQuarkFactory[T]:
-        """
-        Enable quark[Type](value) syntax for explicit type hints.
-
-        Example:
-            user = quark[User | None](None)
-            items = quark[list[str]]([])
-        """
+        """Enable quark[Type](value) syntax for explicit type hints."""
         return _TypedQuarkFactory[T]()
 
 
