@@ -34,6 +34,8 @@ unsub()  # stop listening
 temperature.reset()  # back to 20.0
 
 # Batch updates (single notification)
+sensor1 = quark(20.0)
+sensor2 = quark(55.0)
 with batch():
     sensor1.set(25.0)
     sensor2.set(60.0)
@@ -143,6 +145,7 @@ counter.set(42)  # [counter] 0 -> 42
 ```python
 from statequark import quark, loadable
 
+# Loadable values are set manually (no automatic async integration).
 data = quark(None)
 state = loadable(data)
 state.set_loading()   # state.value.state == "loading"
